@@ -83,11 +83,3 @@ class Edge:
         self.end = end
         # List with the possible utterances in the edge
         self.utterances = utterances
-
-
-# ['inform', 'reqalts', 'confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'negate', 'hello', 'repeat', 'ack', 'restart', 'deny', 'reqmore']
-
-if __name__ == '__main__':
-    s_m = StateManager()
-
-    print(s_m.processState(State.S1, 'ack'))
