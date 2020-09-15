@@ -159,6 +159,8 @@ class Models:
         # In case the food is not found, use some keyword matching,
         # maybe there is a spelling error
 
+        # TODO keywords matching heree
+
         if pref['food'] == '':
             # Extract variable before keyword 'food'
             words = string.split(" ")

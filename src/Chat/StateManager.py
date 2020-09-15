@@ -4,7 +4,7 @@ from enum import Enum
 class StateManager:
 
     def __init__(self):
-        #TODO: update the graph
+        #TODO: update the graph according to graph in Teams
 
         # Create the graph
         s1 = StateNode(State.S1)
@@ -21,15 +21,15 @@ class StateManager:
         s1.addEdge(e1)
         s1.addEdge(e2)
 
-        e3 = Edge(s3, ['confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'hello', 'repeat', 'ack', 'restart',
-                       'deny', 'reqmore'])
-        e4 = Edge(s4, ['inform', 'reqalts', 'negate'])
+        # TODO: come up with a way this works. State2 is a transition node where the preference are checked
+        e3 = Edge(s3, [])
+        e4 = Edge(s4, [])
         s2.addEdge(e3)
         s2.addEdge(e4)
 
-        e5 = Edge(s3, ['confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'repeat', 'ack', 'deny', 'reqmore'])
-        e6 = Edge(s4, ['inform', 'reqalts', 'negate'])
-        e7 = Edge(s1, ['restart', 'hello'])
+        e5 = Edge(s3, ['confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'repeat', 'ack', 'deny', 'reqmore', 'hello'])
+        e6 = Edge(s2, ['inform', 'reqalts', 'negate'])
+        e7 = Edge(s1, ['restart'])
         s3.addEdge(e5)
         s3.addEdge(e6)
         s3.addEdge(e7)
@@ -85,6 +85,7 @@ class StateNode:
 class Edge:
 
     def __init__(self, end, utterances):
+        # Attach to the end node
         self.end = end
         # List with the possible utterances in the edge
         self.utterances = utterances
