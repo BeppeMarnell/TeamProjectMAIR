@@ -7,17 +7,19 @@ import time
 class Main:
 
     def __init__(self):
-        # load the dataset
-        data = DatasetLoader('assets/dialog_acts.dat')
+        # Load the dataset
+        data = DatasetLoader()
 
-        # create and train the models
+        # Create and train the models
         modelz = Models(data)
-        modelz.showPerformances()
-        modelz.baseline2 = True
+        # modelz.showPerformances()
+        modelz.setSingleModel()  # this will set the logistic regression model
 
+        # Wait for the models to finish loading
         while not modelz.endLoading:
             time.sleep(1)
 
+        # Initialize the chat and run the dialogs
         chat = ChatManager(modelz)
         chat.run()
 
