@@ -48,6 +48,8 @@ class ChatManager:
             # Update preferences and state
             new_preferences = self.models.extractPreference(user_input)
 
+            # TODO: for now basic talking stuff
+
             # Change preferences where necessary
             if new_preferences['food'] != '':
                 self.pref_df.at['0', 'food'] = new_preferences['food']

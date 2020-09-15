@@ -4,6 +4,8 @@ from enum import Enum
 class StateManager:
 
     def __init__(self):
+        #TODO: update the graph according to graph in Teams
+
         # Create the graph
         s1 = StateNode(State.S1)
         s2 = StateNode(State.S2)
@@ -19,15 +21,15 @@ class StateManager:
         s1.addEdge(e1)
         s1.addEdge(e2)
 
-        e3 = Edge(s3, ['confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'hello', 'repeat', 'ack', 'restart',
-                       'deny', 'reqmore'])
-        e4 = Edge(s4, ['inform', 'reqalts', 'negate'])
+        # TODO: come up with a way this works. State2 is a transition node where the preference are checked
+        e3 = Edge(s3, [])
+        e4 = Edge(s4, [])
         s2.addEdge(e3)
         s2.addEdge(e4)
 
-        e5 = Edge(s3, ['confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'repeat', 'ack', 'deny', 'reqmore'])
-        e6 = Edge(s4, ['inform', 'reqalts', 'negate'])
-        e7 = Edge(s1, ['restart', 'hello'])
+        e5 = Edge(s3, ['confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'repeat', 'ack', 'deny', 'reqmore', 'hello'])
+        e6 = Edge(s2, ['inform', 'reqalts', 'negate'])
+        e7 = Edge(s1, ['restart'])
         s3.addEdge(e5)
         s3.addEdge(e6)
         s3.addEdge(e7)
@@ -42,6 +44,9 @@ class StateManager:
     def processState(self, state, utterance):
         # All the possibilities should be here, based on the utterance,
         # the function will return the next state
+
+        #TODO: add special case, when in state S2,
+        # then check for preferences before going on
 
         for s in self.__states:
             if s.state == state:
@@ -80,14 +85,7 @@ class StateNode:
 class Edge:
 
     def __init__(self, end, utterances):
+        # Attach to the end node
         self.end = end
         # List with the possible utterances in the edge
         self.utterances = utterances
-
-
-# ['inform', 'reqalts', 'confirm', 'affirm', 'request', 'thankyou', 'null', 'bye', 'negate', 'hello', 'repeat', 'ack', 'restart', 'deny', 'reqmore']
-
-if __name__ == '__main__':
-    s_m = StateManager()
-
-    print(s_m.processState(State.S1, 'ack'))
