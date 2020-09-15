@@ -4,6 +4,8 @@ from enum import Enum
 class StateManager:
 
     def __init__(self):
+        #TODO: update the graph
+
         # Create the graph
         s1 = StateNode(State.S1)
         s2 = StateNode(State.S2)
@@ -42,6 +44,9 @@ class StateManager:
     def processState(self, state, utterance):
         # All the possibilities should be here, based on the utterance,
         # the function will return the next state
+
+        #TODO: add special case, when in state S2,
+        # then check for preferences before going on
 
         for s in self.__states:
             if s.state == state:
