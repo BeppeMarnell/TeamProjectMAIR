@@ -20,6 +20,7 @@ class Models:
         self.areas = self.dataset.restaurant_info_df['area'].unique()
         self.foods = self.dataset.restaurant_info_df['food'].unique()
 
+        #TODO: here you can activate and deactivate the models
         self.models = {
             'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
             #'decTree': DecisionTreeClassifier(),
@@ -29,7 +30,10 @@ class Models:
         }
 
         # Set some variables
-        self.singleModel = False
+
+        # TODO: Here you can activate if you'd like one or multiple models at the same time
+        # TODO: From task 1.b on, it is not possible to have multiple models
+        self.singleModel = True
         self.singleModelName = 'logReg'  # Default one
 
         self.baseline1 = baseline1
@@ -98,6 +102,7 @@ class Models:
         self.singleModelName = name
 
     def evalueNewUtterance(self, utterance):
+        # TODO: Implement other baselines in a more thoughtful way
         # Implement baseline
         if self.baseline1:
             return 'inform'
