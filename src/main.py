@@ -1,6 +1,6 @@
-from src.Chat.ChatManager import ChatManager
-from src.DatasetLoader import DatasetLoader
-from src.Models import Models
+from Chat.ChatManager import ChatManager
+from DatasetLoader import DatasetLoader
+from Models import Models
 import time
 
 

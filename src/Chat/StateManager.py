@@ -5,6 +5,7 @@ class StateManager:
 
     def __init__(self):
         # Create the graph
+        #TODO: update the graph according to the graph in teams
         s1 = StateNode(State.S1)
         s2 = StateNode(State.S2)
         s3 = StateNode(State.S3)

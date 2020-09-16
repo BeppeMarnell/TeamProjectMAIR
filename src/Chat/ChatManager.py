@@ -1,4 +1,4 @@
-from src.Chat.StateManager import State, StateManager
+from StateManager import State, StateManager
 import pandas as pd
 
 
@@ -47,6 +47,9 @@ class ChatManager:
 
             # Update preferences and state
             new_preferences = self.models.extractPreference(user_input)
+
+
+            # TODO: for now basic talking stuff 
 
             # Change preferences where necessary
             if new_preferences['food'] != '':
