@@ -20,6 +20,10 @@ class Models:
         self.areas = self.dataset.restaurant_info_df['area'].unique()
         self.foods = self.dataset.restaurant_info_df['food'].unique()
 
+        self.restaurants = pd.DataFrame()
+        self.recommendation = None
+        self.index = -1
+
         #TODO: here you can activate and deactivate the models
         self.models = {
             'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
@@ -159,11 +163,11 @@ class Models:
         # In case the food is not found, use some keyword matching,
         # maybe there is a spelling error
 
-        # TODO keywords matching heree
-
+        # TODO keywords matching here
+        words = string.split(" ")
         if pref['food'] == '':
             # Extract variable before keyword 'food'
-            words = string.split(" ")
+            # words = string.split(" ")
 
             if 'food' in words:
                 miss_word = ''
@@ -172,29 +176,97 @@ class Models:
                     if words[indx] == 'food':
                         miss_word = words[indx - 1]
 
-                # Check for matching with Levenshtein distance
-                # more than distance 3 it will fail
-                dst = {
-                    '1': [],
-                    '2': [],
-                    '3': []
-                }
+                pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
 
-                # let's check if every misspelled word before food can be similar to something in the dataset
-                for food in self.foods:
-                    if lev.distance(food, miss_word) <= 3:
-                        dst[str(lev.distance('Levenshtein', 'food'))].append(food)
+        if pref['area'] == '':
+            # Only use words in sentences that contain in (like in the center, ...)
+            if 'in' in words:
+                miss_word = ''
 
-                # finally let's set the food preference giving priority to the one with less distance
-                if len(dst['1']) > 1:
-                    pref['food'] = dst['1']
-                else:
-                    if len(dst['2']) > 1:
-                        pref['food'] = dst['2']
-                    else:
-                        if len(dst['3']) > 1:
-                            pref['food'] = dst['3']
+                for indx in range(0, len(words)):
+                    if words[indx] == 'in':
+                        if words[indx+1] == 'the':
+                            miss_word = words[indx+2]
+                pref['area'] = self.get_levenshtein_items([miss_word], self.areas)
 
-                # Add something to say that in case the word does not exist the user need to specify it
-
+        if pref['pricerange'] == '':
+            # TODO find keywords
+            pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
         return pref
+
+    def get_levenshtein_items(self, miss_words, possible_words):
+        # Check for matching with Levenshtein distance
+        # more than distance 3 it will fail
+        dst = {
+            '1': [],
+            '2': [],
+            '3': []
+        }
+        for miss_word in miss_words:
+            # let's check if every misspelled word before food can be similar to something in the dataset
+            for word in possible_words:
+                if lev.distance(word, miss_word) <= 3:
+                    dst[str(lev.distance(word, miss_word))].append(word)
+        print(dst)
+        pref = []
+        # finally let's set the preference giving priority to the one with less distance
+        if len(dst['1']) >= 1:
+            pref = dst['1'][0]
+        else:
+            if len(dst['2']) >= 1:
+                pref = dst['2'][0]
+            else:
+                if len(dst['3']) >= 1:
+                    pref = dst['3'][0]
+                else:
+                    return ''
+                    # TODO set state to request more info (set string saying name is not recognized)
+        return pref
+
+    def lookup_in_restaurant_info(self, preferences):
+        restaurants = self.dataset.restaurant_info_df.loc[
+            (self.dataset.restaurant_info_df['food'] == preferences.loc[0]['food']) &
+            (self.dataset.restaurant_info_df['area'] == preferences.loc[0]['area']) &
+            (self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange'])]
+        self.restaurants = restaurants.reset_index()
+
+    def recommend_restaurant(self):
+        # TODO fix methods (confusing code)
+        if len(self.restaurants) == 0:
+            self.index = -1
+            return []
+        if len(self.restaurants) <= self.index:
+            # set to -1, as it will be increased by one in method below
+            self.index = -1
+            # return here to execute utterance saying that no more restaurants were found.
+            # if another is requested, start over
+            return [-1]
+        return self.restaurants.loc[self.index]
+
+    def recommend(self, preferences):
+        self.index += 1
+        if not set(self.restaurants):
+            self.lookup_in_restaurant_info(preferences)
+        self.recommendation = self.recommend_restaurant()
+        # print(self.recommendation)
+
+    def extract_details(self, string):
+        string = string.lower()
+        requested = []
+        # TODO add restaurant, name, price, type, address, number as keywords
+        # details = ["restaurantname", "pricerange", "area", "food", "phone", "addr", "postcode"]
+        details = {"restaurantname": ["name", "restaurantname", "restaurant"],
+                   "pricerange": ["price", "pricerange", "cost", "how much"],
+                   "area": ["area", "city", "part", "region"],
+                   "food": ["food", "type", "category"],
+                   "phone": ["phone number", "phone", "number"],
+                   "addr": ["address", "street", "where"],
+                   "postcode": ["postcode"]}
+
+        for element in details.keys():
+            names = details.get(element)
+            for item in names:
+                if item in string:
+                    requested.append((details.get(element)[0], self.recommendation[element]))
+                    break
+        return requested
