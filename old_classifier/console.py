@@ -1,5 +1,5 @@
-from text_classification import Classification
-import evaluation
+from old_classifier.text_classification import Classification
+import old_classifier.evaluation
 import time
 
 

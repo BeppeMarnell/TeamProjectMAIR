@@ -1,4 +1,4 @@
-from text_classification import Classification
+from old_classifier.text_classification import Classification
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
