@@ -21,7 +21,7 @@ class Main:
             time.sleep(1)
 
         # Initialize the chat and run the dialogs
-        chat = ChatManager(modelz)
+        chat = ChatManager(modelz, data)
         chat.run()
 
 

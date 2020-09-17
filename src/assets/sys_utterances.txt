@@ -1,8 +1,10 @@
 welcome -----> Welcome to the dialog system project
-state1 -----> What is your restaurant preference?
+state1 -----> You can ask for a restaurant preference based on price range, area and food.
 askfood -----> What is your food preference?
 askarea -----> What is your area preference?
 askprice -----> What is your price preference?
 suggestrest -----> What about restaurant_name?
 nofoodres -----> Could you specify the type of food?
+noareares -----> Could you specify the area?
+noprice -----> Could you specify the price range?
 noresults -----> There are no results for your preferences. Do you want to restart?

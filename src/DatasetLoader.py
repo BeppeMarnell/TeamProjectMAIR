@@ -17,6 +17,7 @@ class DatasetLoader:
         self.restaurant_info_df = self.restaurant_info_df.replace(np.nan, 'unknown', regex=True)
 
         # Clean the dataset
+        # Think baseline 2 can be left out?
         self.__clean(baseline2)
 
         # Split the dataset for training and for tests
@@ -40,12 +41,14 @@ class DatasetLoader:
         print('-----> Dataset Loaded \n')
 
     def __clean(self, baseline2):
+        # Remove baseline2?
         # Lower case all
         self.utterances_df['dialog_act'] = self.utterances_df['dialog_act'].str.lower()
         self.utterances_df['utterance_content'] = self.utterances_df['utterance_content'].str.lower()
 
         # Implement the 2nd baseline system A baseline rule-based system based on keyword matching. An example rule
         # could be: anytime an utterance contains ‘goodbye’, it would be classified with the dialog act bye.
+
 
     def showHead(self):
         print(self.utterances_df.head())

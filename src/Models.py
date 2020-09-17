@@ -173,6 +173,7 @@ class Models:
             return self.RegExpress_baseline2(utterance)
 
         # Evaluate the new utterance
+        # Uses the learned vocab based on the training 
         if self.singleModel:
             test = self.dataset.count_vect.transform([utterance])
             predicted = self.models[self.singleModelName].predict(test)
@@ -240,7 +241,7 @@ class Models:
                     '3': []
                 }
 
-                # let's check if every misspelled word before food can be similar to something in the dataset
+                # let's check if every misspelled word before food can be similar to something in the datase
                 for food in self.foods:
                     if lev.distance(food, miss_word) <= 3:
                         dst[str(lev.distance('Levenshtein', 'food'))].append(food)
@@ -254,6 +255,8 @@ class Models:
                     else:
                         if len(dst['3']) > 1:
                             pref['food'] = dst['3']
+                        #else:
+
 
                 # Add something to say that in case the word does not exist the user need to specify it
 

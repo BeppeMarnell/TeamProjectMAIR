@@ -4,9 +4,12 @@ import pandas as pd
 
 class ChatManager:
 
-    def __init__(self, models):
+    def __init__(self, models, data):
         # Define properties
         self.models = models
+
+        # Get the data for restaurant recommendations
+        self.data = data
 
         # Define preferences
         pref = {
@@ -33,6 +36,7 @@ class ChatManager:
         print(self.sys_utter['welcome'])
 
     def run(self):
+
         # Start the chat loop
         while True:
             # Check system state and preferences
@@ -76,12 +80,15 @@ class ChatManager:
 
             self.state = new_state
 
+            if self.state == State.S5:
+                break
+
 
     def SystemStateUtterance(self):
         # Check whether the preferences are filled
         food = True if self.pref_df['food'].tolist()[0] != '' else False
         area = True if self.pref_df['area'].tolist()[0] != '' else False
-        price = True if self.pref_df['pricerange'].tolist()[0] != '' else False
+        price = True if self.pref_df['pricerange'].tolist()[0] != '' else False #if no price preference, then it is true 
 
         # Check the state
         if self.state == State.S1:
@@ -99,3 +106,12 @@ class ChatManager:
         if self.state == State.S2 and price:
             print(self.sys_utter['askprice'])
             return
+        
+        #if self.state == State.S4:
+        #suggest restaurant
+        #restaurants = ResRecommendations(self.pref_df, self.data)
+        #prin(self.sys_utter['suggestres'].replace('restaurant_name', str(restaurants.recommend_list.restaurantname.iloc[0]))
+
+        #if self.state == State.S5
+        #print(self.sys_utter['thankyoubye])
+        #  
