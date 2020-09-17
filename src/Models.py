@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import re
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
@@ -16,9 +17,9 @@ class Models:
         self.dataset = dataset
 
         # Prepare some useful data
-        self.price_ranges = self.dataset.restaurant_info_df['pricerange'].unique()
-        self.areas = self.dataset.restaurant_info_df['area'].unique()
-        self.foods = self.dataset.restaurant_info_df['food'].unique()
+        self.price_ranges = self.dataset.restaurant_info_df['pricerange'].unique() #unique restaurant prices 
+        self.areas = self.dataset.restaurant_info_df['area'].unique() #unique restaurant areas 
+        self.foods = self.dataset.restaurant_info_df['food'].unique() #unique restaurant foods 
 
         self.models = {
             'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
@@ -52,6 +53,7 @@ class Models:
 
         if self.singleModel:
             # Calculate performance for single model
+            #SetSingleModel is true so this will be executed 
             print(''.join(['-----> Model: ', self.models[self.singleModelName]]))
             acc = self.__accuracy(self.models[self.singleModelName])
             aucroc = self.__AUCROC(self.models[self.singleModelName])
@@ -97,13 +99,78 @@ class Models:
         self.singleModel = singleModel
         self.singleModelName = name
 
+    def RegExpress_baseline2(self, utterance):
+        #Define words and regular expressions for the second baseline 
+        bye = re.search("good bye|darling|dear|goodb|[a-z]*bye", utterance)
+        thankyou = re.search("thank you|welcome|thank|thanks|day|good[a-z]*|afternoon", utterance)
+        ack = re.search("okay|um|ok|umh|ah", utterance)
+        affirm = re.search("yes|right|alright|yeah|perfect|correct|cool|nice|awesome|great|sounds", utterance)
+        confirm = re.search("is it|said|yea", utterance)
+        deny = re.search("alternative|dont|not|cannot|doesnt|shitty|suck|sucks|hate|wrong|fuck", utterance)
+        hello = re.search("^hello|^hi|^hey|^halo", utterance)
+        inform = re.search("food|christmas|asian|west|north|east|south|thai[a-z]*|austra[a_z]*|chin[a-z]+|want[a-z]*|ita[a-z]*|exp[a-z]+|veg[e\-i]tarian|recommend|french|information|downtown|looking|searching|help|serve[a-z]+|rest[a-z][a-z]+|viet[a-z]*|seafood|food|turki[a-z]+|cheap|pizza|moder[a-z]+|kitchen|oriental|mexican|child|european", utterance)
+        negate = re.search("not|any", utterance)
+        null = re.search("hm|sil|mmhmm|ringing|laugh[a-z]*|huh|sigh|missing|inaudible|cough|oh|noise|yawning|tv_noise|uh|background_speech|breath", utterance)
+        repeat = re.search("sorry|repeat|again|answer", utterance)
+        reqalts = re.search("anything|how about|what about|alternative|different|asian", utterance)
+        reqmore = re.search("more|suggestions", utterance)
+        request = re.search("their|may|pri[sc]e|wheres|what is|whats|nu[a-z]*|options|ad[a-z]*|post[a-z]*|locat[a-z]+|range|venue", utterance)
+        restart = re.search("start over|nevermind", utterance)
+           
+        if bye !=None:
+            return 'bye'
+    
+        if hello != None:
+            return 'hello'
+            
+        if affirm !=None:
+            return 'affirm'
+
+        if ack != None:
+            return 'ack'
+        
+        if confirm != None:
+            return 'confirm'
+        
+        if deny != None:
+            return 'deny'
+
+        if inform != None:
+            return 'inform'
+        
+        if negate != None:
+            return 'negate'
+        
+        if null != None:
+            return 'null'
+        
+        if repeat != None:
+            return 'repeat'
+        
+        if reqalts != None:
+            return 'reqalts'
+        
+        if reqmore != None:
+            return 'reqmore'
+        
+        if request != None:
+            return 'request'
+        
+        if restart != None:
+            return 'restart'
+        
+        if thankyou != None:
+            return 'thankyou'
+        
+        return 'not found'
+
     def evalueNewUtterance(self, utterance):
         # Implement baseline
         if self.baseline1:
             return 'inform'
 
-        if self.baseline2 and ('have a nice' in utterance):
-            return 'bye'
+        if self.baseline2:
+            return self.RegExpress_baseline2(utterance)
 
         # Evaluate the new utterance
         if self.singleModel:

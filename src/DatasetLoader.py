@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
+import re
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
 
 
 class DatasetLoader:
 
-    def __init__(self, baseline2=False):
+    def __init__(self, baseline2=True):
         # Load the dataset
         self.utterances_df = pd.read_csv('assets/dialog_acts.dat', names=['dialog_act'])
         self.utterances_df[['dialog_act', 'utterance_content']] = self.utterances_df["dialog_act"].str.split(" ", 1, expand=True)
@@ -23,16 +24,16 @@ class DatasetLoader:
 
         # Create a BOW
         self.count_vect = CountVectorizer(min_df=0)
-        x_bow = self.count_vect.fit_transform(train['utterance_content'])
+        x_bow = self.count_vect.fit_transform(train['utterance_content']) #learn vocab and transform 
 
         tfidf_transformer = TfidfTransformer()
         self.x_train = tfidf_transformer.fit_transform(x_bow)
 
         # Create a BOW representation of the test set
-        self.x_test = self.count_vect.transform(test['utterance_content'])
+        self.x_test = self.count_vect.transform(test['utterance_content']) #transform test set with learned vocab of train set 
 
         # Get the labels for the training set
-        self.y_train = train['dialog_act'].values
+        self.y_train = train['dialog_act'].values #creates an array
         self.y_test = test['dialog_act'].values
 
         # LOGs
@@ -45,11 +46,6 @@ class DatasetLoader:
 
         # Implement the 2nd baseline system A baseline rule-based system based on keyword matching. An example rule
         # could be: anytime an utterance contains ‘goodbye’, it would be classified with the dialog act bye.
-        if baseline2:
-            indx = self.utterances_df.loc[self.utterances_df['utterance_content'].str.contains("have a nice day")].index
-
-            for i in indx:
-                self.utterances_df.loc[i, 'dialog_act'] = "bye"
 
     def showHead(self):
         print(self.utterances_df.head())

@@ -1,4 +1,4 @@
-from StateManager import State, StateManager
+from StateManager import *
 import pandas as pd
 
 
