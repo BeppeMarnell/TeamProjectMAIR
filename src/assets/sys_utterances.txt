@@ -1,0 +1,11 @@
+welcome -----> Welcome to the dialog system project
+state1 -----> What is your restaurant preference?
+askfood -----> What is your food preference?
+askarea -----> What is your area preference?
+askprice -----> What is your price preference?
+suggestrest -----> What about restaurant_name?
+nofoodres -----> Could you specify the type of food?
+noresults -----> There are no results for your preferences. Do you want to restart?
+nomoreresults -----> There are no further results for your preferences. Request another to show the first one again.
+details -----> The detail_type is detail_info.
+bye -----> Thank you for using the dialog system. Good bye!
