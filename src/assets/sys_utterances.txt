@@ -8,4 +8,9 @@ nofoodres -----> Could you specify the type of food?
 noresults -----> There are no results for your preferences. Do you want to restart?
 nomoreresults -----> There are no further results for your preferences. Request another to show the first one again.
 details -----> The detail_type is detail_info.
-bye -----> Thank you for using the dialog system. Good bye!
+confirmtrue -----> Yes, the preference_name is preference_value.
+confirmfalse -----> No, the preference_name is preference_value.
+affirm -----> You chose restaurant_name. Would you like to know more details about it?
+misunderstanding -----> Sorry, I could not understand what you said, please repeat it.
+restart -----> Restarting from the beginning.
+bye -----> Thank you for using the MAIRDISY (MAIR DIalog SYstem). Good bye!
