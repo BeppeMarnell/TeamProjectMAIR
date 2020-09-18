@@ -8,3 +8,8 @@ nofoodres -----> Could you specify the type of food?
 noareares -----> Could you specify the area?
 noprice -----> Could you specify the price range?
 noresults -----> There are no results for your preferences. Do you want to restart?
+reqarea -----> The area is area_place
+reqfood ----> The food they serve is food_type
+reqphone -----> The phone number is phone_number
+reqpostcode ----> The post code is post_code
+thankyoubye -----> Thank you, bye

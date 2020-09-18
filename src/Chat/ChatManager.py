@@ -1,4 +1,5 @@
 from StateManager import *
+from ResRecommendation import *
 import pandas as pd
 
 
@@ -10,6 +11,9 @@ class ChatManager:
 
         # Get the data for restaurant recommendations
         self.data = data
+
+        self.recommendation_list = ResRecommendation(self.data, self.pref_df)
+        self.restaurant = self.recommendation_list[0]
 
         # Define preferences
         pref = {
@@ -49,24 +53,24 @@ class ChatManager:
             utterance = self.models.evalueNewUtterance(user_input)
             new_state = self.__state_manager.processState(self.state, utterance)
 
-            # Update preferences and state
-            new_preferences = self.models.extractPreference(user_input)
-
-
             # TODO: for now basic talking stuff 
+            if utterance == 'inform' or 'requalts':
+                
+                # Update preferences and state
+                new_preferences = self.models.extractPreference(self.user_input)
 
-            # Change preferences where necessary
-            if new_preferences['food'] != '':
-                self.pref_df.at['0', 'food'] = new_preferences['food']
+                # Change preferences where necessary
+                if new_preferences['food'] != '':
+                    self.pref_df.at['0', 'food'] = new_preferences['food']
 
-            if new_preferences['area'] != '':
-                self.pref_df.at['0', 'area'] = new_preferences['area']
+                if new_preferences['area'] != '':
+                    self.pref_df.at['0', 'area'] = new_preferences['area']
 
-            if new_preferences['pricerange'] != '':
-                self.pref_df.at['0', 'pricerange'] = new_preferences['pricerange']
+                if new_preferences['pricerange'] != '':
+                    self.pref_df.at['0', 'pricerange'] = new_preferences['pricerange']
 
-            # Update the system state
-            # if new_state == State.S4 and self.state == State.S3 and
+                # Update the system state
+                # if new_state == State.S4 and self.state == State.S3 and
 
             print('')
             print('utterance: ')
@@ -79,8 +83,11 @@ class ChatManager:
             print(new_state)
 
             self.state = new_state
+            self.old_utterance = utterance 
+            self.old_input = user_input
 
             if self.state == State.S5:
+                print(self.sys_utter['thankyoubye'])
                 break
 
 
@@ -92,26 +99,92 @@ class ChatManager:
 
         # Check the state
         if self.state == State.S1:
-            print(self.sys_utter['state1'])
-            return
+            self.rsp = self.sys_utter['state1'])
+            print(self.rsp)
 
         if self.state == State.S2 and food:
-            print(self.sys_utter['askfood'])
-            return
+            self.rsp = self.sys_utter['askfood'])
+            print(self.rsp)
 
         if self.state == State.S2 and area:
-            print(self.sys_utter['askarea'])
-            return
+            self.rsp = self.sys_utter['askarea'])
+            print(self.rsp)
 
         if self.state == State.S2 and price:
-            print(self.sys_utter['askprice'])
-            return
+            self.rsp = self.sys_utter['askprice'])
+            print(self.rsp)
+                
+        if self.old_utterance == 'ack':
         
-        #if self.state == State.S4:
-        #suggest restaurant
-        #restaurants = ResRecommendations(self.pref_df, self.data)
-        #prin(self.sys_utter['suggestres'].replace('restaurant_name', str(restaurants.recommend_list.restaurantname.iloc[0]))
+        if self.old_utterance == 'affirm':
+            if self.state == State.S4:
+                if len(self.recommendation_list) == 0:
+                    self.rsp = self.sys_utter['noresults'])
+                    print(self.rsp)
+                else:
+                    self.rsp = self.sys_utter['suggestrest'].replace('restaurant_name', self.restaurant))
+                    print(self.rsp)
+        
+        if self.old_utterance == 'confirm': 
+            if self.state == State.S4:
+                if len(self.recommendation_list) == 0:
+                    self.rsp = self.sys_utter['noresults'])
+                    print(self.rsp)
+                else:
+                    self.rsp = self.sys_utter['suggestrest'].replace('restaurant_name', self.restaurant))
+                    print(self.rsp)
+        
+        if self.old_utterance == 'deny':
+        
+        ##if self.old_utterance == 'hello':
+        # This will automatically go to state 1
 
-        #if self.state == State.S5
-        #print(self.sys_utter['thankyoubye])
-        #  
+        #if self.old_utterance == 'null':
+        # Looking at the data this reponse depends on the previous utterance of the system 
+
+        if self.old_utterance == 'repeat':
+            print(self.rsp)
+        
+        if self.old_utterance == 'requalts':
+            if 'anything' in self.user_input:
+                self.rsp = self.sys_utter['suggestrest'].replace('restaurant_name', self.restaurant.restaurantname[1]))
+
+
+        
+        if self.old_utterance == 'request':
+            if self.state == State.S4: 
+                if 'phone' in self.user_input:
+                    self.rsp = self.sys_utter['reqphone']).replace('phone_number', self.restaurant.phone)
+                    print(self.rsp)
+                if 'post' in self.user_input:
+                    self.rsp = self.sys_utter['reqpost']).replace('post_code', self.restaurant.postcode)
+                    print(self.rsp)
+                if 'food' in self.user_input:
+                    self.rsp = self.sys_utter['reqfood']).replace('food_type', self.restaurant.food)
+                    print(self.rsp)
+                if 'address' in self.user_input:
+                    self.rsp = self.sys_utter['reqphone']).replace('phone_number', self.restaurant.address)
+                    print(self.rsp)
+        
+        
+        if self.old_utterance == 'reqmore':
+            if self.state == State.S4: 
+                if len(self.recommendation_list) == 1:
+                    self.rsp = self.sys_utter['noresults'])
+                    print(self.rsp)
+                else:
+                    self.restaurant = self.recommendation_list[1]
+                    self.rsp = self.sys_utter['suggestrest'].replace('restaurant_name', self.restaurant.restaurantname[1]))
+                    print(self.rsp)
+        
+        #if self.old_utterance == 'restart':
+        # This will automatically go to state1 again 
+            
+
+
+
+
+
+
+
+

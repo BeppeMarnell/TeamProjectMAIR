@@ -18,8 +18,10 @@ class ResRecommendation :
 
         # If one column == 0 or any, it returns True, otherwise False if none contains 0
         if self.rest_recom_df.isin([0]).any().any() == False:  #['pricerange'] != 0 & self.rest_recom_df['area'] != 0 & self.rest_recom_df['food'] != 0:
-
-            self.recommend_list = self.data.restaurant_info_df[(self.data.restaurant_info_df.pricerange == self.preferences.pricerange & self.data.restaurant_info_df.area == self.preferences.area & self.data.restaurant_info_df.food == self.preferences.food)]
+            
+            # Create a new dataframe with the preferenced pricerange, area and food 
+            self.recommend_list = self.data.restaurant_info_df[(self.data.restaurant_info_df.pricerange == self.preferences.pricerange and self.data.restaurant_info_df.area == self.preferences.area and self.data.restaurant_info_df.food == self.preferences.food)]
+           
             #self.recommend_list = self.data.restaurant_info_df[(self.data.restaurant_info_df.pricerange.isin(self.preferences.pricerange) & self.data.restaurant_info_df.area.isin(self.preferences.area) & self.data.restaurant_info_df.food.isin(self.preferences.food)]
 
         else:
@@ -61,6 +63,8 @@ class ResRecommendation :
         if self.rest_recom_df['pricerange'] == 0 and self.rest_recom_df['area'] == 0  and self.rest_recom_df['food'] != 0:
             self.recommend_list = self.data.restaurant_info_df[(self.data.restaurant_info_df.food == self.preferences.food)]
             return self.recommend_list
+
+
         
 
 
