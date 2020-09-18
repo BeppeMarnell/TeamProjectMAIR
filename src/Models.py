@@ -176,7 +176,10 @@ class Models:
                     if words[indx] == 'food':
                         miss_word = words[indx - 1]
 
-                pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
+                if miss_word == 'any' or miss_word == 'world':
+                    pref['food'] = 'any'
+                else:
+                    pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
 
         if pref['area'] == '':
             # Only use words in sentences that contain in (like in the center, ...)
@@ -187,11 +190,20 @@ class Models:
                     if words[indx] == 'in':
                         if words[indx+1] == 'the':
                             miss_word = words[indx+2]
-                pref['area'] = self.get_levenshtein_items([miss_word], self.areas)
+                # TODO find alternatives for any
+                if 'any' in words:
+                    pref['area'] = 'any'
+                else:
+                    pref['area'] = self.get_levenshtein_items([miss_word], self.areas)
 
         if pref['pricerange'] == '':
             # TODO find keywords
-            pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
+
+            if 'price' in words:
+                if 'any' == words[words.index('price')-1]:
+                    pref['pricerange'] = 'any'
+            else:
+                pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
         return pref
 
     def get_levenshtein_items(self, miss_words, possible_words):
@@ -224,10 +236,20 @@ class Models:
         return pref
 
     def lookup_in_restaurant_info(self, preferences):
-        restaurants = self.dataset.restaurant_info_df.loc[
-            (self.dataset.restaurant_info_df['food'] == preferences.loc[0]['food']) &
-            (self.dataset.restaurant_info_df['area'] == preferences.loc[0]['area']) &
-            (self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange'])]
+        if preferences.loc[0]['food'] != 'any':
+            food = self.dataset.restaurant_info_df['food'] == preferences.loc[0]['food']
+        else:
+            food = True
+        if preferences.loc[0]['area'] != 'any':
+            area = self.dataset.restaurant_info_df['area'] == preferences.loc[0]['area']
+        else:
+            area = True
+        if preferences.loc[0]['pricerange'] != 'any':
+            pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
+        else:
+            pricerange = True
+
+        restaurants = self.dataset.restaurant_info_df.loc[food & area & pricerange]
         self.restaurants = restaurants.reset_index()
 
     def recommend_restaurant(self):
