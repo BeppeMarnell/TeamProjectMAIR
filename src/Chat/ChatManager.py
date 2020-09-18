@@ -60,8 +60,6 @@ class ChatManager:
             # Evaluate inputted utterance and check the next state
             utterance = self.models.evalueNewUtterance(user_input)
 
-            # TODO: for now basic talking stuff
-
             self.react_to_utterance(utterance, user_input)
 
             # Update the system state
@@ -75,16 +73,16 @@ class ChatManager:
             if new_state == State.S4 and (self.state != State.S4 or utterance == 'reqmore' or utterance == 'reqalts'):
                 self.models.recommend(self.pref_df)
 
-            print('')
-            print('utterance: ')
-            print(utterance)
-            # print(new_preferences)
-            print('preference: ')
-            print(self.pref_df.loc[0])
-            print('current state: ')
-            print(self.state)
-            print('new state: ')
-            print(new_state)
+            # print('')
+            # print('utterance: ')
+            # print(utterance)
+            # # print(new_preferences)
+            # print('preference: ')
+            # print(self.pref_df.loc[0])
+            # print('current state: ')
+            # print(self.state)
+            # print('new state: ')
+            # print(new_state)
 
             self.state = new_state
 
@@ -207,7 +205,7 @@ class ChatManager:
             return
 
         if utterance == 'deny':
-            # TODO
+            # TODO? This utterance never appears in the dialog_acts
             pass
 
         if utterance == 'hello':
@@ -232,8 +230,9 @@ class ChatManager:
             return
 
         if utterance == 'negate':
-            # TODO
-            pass
+            # TODO add possibility to choose "not korean food" or "not in the center"
+            # new_preferences = self.models.negative_preferences(user_input)
+            return
 
         if utterance == 'null':
             # don't need to do anything, as the text for misunderstanding will be printed if command was not understood
