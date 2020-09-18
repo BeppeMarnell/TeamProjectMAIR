@@ -7,6 +7,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 import Levenshtein as lev
+import nltk
+from nltk.corpus import stopwords
 
 
 class Models:
@@ -24,13 +26,13 @@ class Models:
         self.recommendation = None
         self.index = -1
 
-        #TODO: here you can activate and deactivate the models
+        # TODO: here you can activate and deactivate the models
         self.models = {
             'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
-            #'decTree': DecisionTreeClassifier(),
-            #'SVM': SVC(gamma='scale', probability=True, C=1),
-            #'multiNB': MultinomialNB(),
-            #'kNeigh': KNeighborsClassifier(n_neighbors=3)
+            # 'decTree': DecisionTreeClassifier(),
+            # 'SVM': SVC(gamma='scale', probability=True, C=1),
+            # 'multiNB': MultinomialNB(),
+            # 'kNeigh': KNeighborsClassifier(n_neighbors=3)
         }
 
         # Set some variables
@@ -53,7 +55,6 @@ class Models:
         # LOGs
         print('-----> All models have been loaded and trained on BOW \n')
         self.endLoading = True
-
 
     def showPerformances(self):
         self.endLoading = False
@@ -188,8 +189,8 @@ class Models:
 
                 for indx in range(0, len(words)):
                     if words[indx] == 'in':
-                        if words[indx+1] == 'the':
-                            miss_word = words[indx+2]
+                        if words[indx + 1] == 'the':
+                            miss_word = words[indx + 2]
                 # TODO find alternatives for any
                 if 'any' in words:
                     pref['area'] = 'any'
@@ -200,15 +201,45 @@ class Models:
             # TODO find keywords
 
             if 'price' in words:
-                if 'any' == words[words.index('price')-1]:
+                if 'any' == words[words.index('price') - 1]:
                     pref['pricerange'] = 'any'
             else:
                 pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
+
         return pref
+
+    # TODO fix method (not mandatory but nice to have)
+    # def negative_preferences(self, string):
+    #     """
+    #       This method evaluates strings in the form "not in the centre" and "no european food" and ensures that the
+    #       no is handled correctly (suggest everything except that part)
+    #     """
+    #     words = string.split(" ")
+    #     negative_words = ['no', 'not']
+    #     negation_indices = []
+    #     for negative_word in negative_words:
+    #         indices = [i for i, x in enumerate(words) if x == negative_word]
+    #         negation_indices.append(indices)
+    #     negation_indices = [item for sublist in negation_indices for item in sublist]
+    #     print(negation_indices)
+    #     for index in negation_indices:
+    #         if len(words) >= index+1:
+    #             miss_word = words[index+1]
+    #             print(miss_word)
+    #             pref = self.extractPreference(miss_word)
+    #             print(pref)
+    #             # price = self.get_levenshtein_items([miss_word], self.foods)
 
     def get_levenshtein_items(self, miss_words, possible_words):
         # Check for matching with Levenshtein distance
         # more than distance 3 it will fail
+
+        # remove all stopwords to not get a close distance to words like 'the'
+        stop_words = set(stopwords.words('english'))
+        # print(miss_words)
+        miss_words = [w for w in miss_words if w not in stop_words]
+        # print(miss_words)
+
         dst = {
             '1': [],
             '2': [],
@@ -219,7 +250,7 @@ class Models:
             for word in possible_words:
                 if lev.distance(word, miss_word) <= 3:
                     dst[str(lev.distance(word, miss_word))].append(word)
-        print(dst)
+        # print(dst)
         pref = []
         # finally let's set the preference giving priority to the one with less distance
         if len(dst['1']) >= 1:
@@ -253,7 +284,6 @@ class Models:
         self.restaurants = restaurants.reset_index()
 
     def recommend_restaurant(self):
-        # TODO fix methods (confusing code)
         if len(self.restaurants) == 0:
             self.index = -1
             return []
