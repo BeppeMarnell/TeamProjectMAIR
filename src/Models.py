@@ -183,7 +183,7 @@ class Models:
                 # let's check if every misspelled word before food can be similar to something in the dataset
                 for food in self.foods:
                     if lev.distance(food, miss_word) <= 3:
-                        dst[str(lev.distance('Levenshtein', 'food'))].append(food)
+                        dst[str(lev.distance(food, miss_word))].append(food)
 
                 # finally let's set the food preference giving priority to the one with less distance
                 if len(dst['1']) > 1:
