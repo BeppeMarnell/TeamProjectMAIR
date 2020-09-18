@@ -52,17 +52,16 @@ class ChatManager:
 
             # Change preferences where necessary
             if new_preferences['food'] != '':
-                self.pref_df.at['0', 'food'] = new_preferences['food']
+                self.pref_df.at[0, 'food'] = new_preferences['food']
 
             if new_preferences['area'] != '':
-                self.pref_df.at['0', 'area'] = new_preferences['area']
+                self.pref_df.at[0, 'area'] = new_preferences['area']
 
             if new_preferences['pricerange'] != '':
-                self.pref_df.at['0', 'pricerange'] = new_preferences['pricerange']
+                self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
 
             # Update the system state
             # if new_state == State.S4 and self.state == State.S3 and
-
             print('')
             print('utterance: ')
             print(utterance)
@@ -78,9 +77,9 @@ class ChatManager:
 
     def SystemStateUtterance(self):
         # Check whether the preferences are filled
-        food = True if self.pref_df['food'].tolist()[0] != '' else False
-        area = True if self.pref_df['area'].tolist()[0] != '' else False
-        price = True if self.pref_df['pricerange'].tolist()[0] != '' else False
+        food = True if self.pref_df['food'].tolist()[0] == '' else False
+        area = True if self.pref_df['area'].tolist()[0] == '' else False
+        price = True if self.pref_df['pricerange'].tolist()[0] == '' else False
 
         # Check the state
         if self.state == State.S1:
