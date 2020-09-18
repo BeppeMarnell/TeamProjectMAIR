@@ -313,7 +313,7 @@ class Models:
                    "food": ["food", "type", "category"],
                    "phone": ["phone number", "phone", "number"],
                    "addr": ["address", "street", "where"],
-                   "postcode": ["postcode"]}
+                   "postcode": ["postcode", "post code"]}
 
         for element in details.keys():
             names = details.get(element)
