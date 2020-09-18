@@ -7,6 +7,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 import Levenshtein as lev
+import random
 
 
 class Models:
@@ -159,42 +160,100 @@ class Models:
         # In case the food is not found, use some keyword matching,
         # maybe there is a spelling error
 
-        # TODO keywords matching heree
+        # TODO keywords matching here
 
-        if pref['food'] == '':
-            # Extract variable before keyword 'food'
-            words = string.split(" ")
+        for missing_pref in ['food', 'area', 'pricerange']:
 
-            if 'food' in words:
-                miss_word = ''
+            if pref[missing_pref] == '':
+                # TODO: p: expand this?
+                keywords = {'food': ['food'], 'area': ['in', 'the'], 'pricerange': ['priced']}
+                keyword_selection = {'food': self.foods, 'area': self.areas, 'pricerange': self.price_ranges}
 
-                for indx in range(0, len(words)):
-                    if words[indx] == 'food':
-                        miss_word = words[indx - 1]
+                # Extract variable before relevant keyword
+                words = string.split(" ")
 
-                # Check for matching with Levenshtein distance
-                # more than distance 3 it will fail
-                dst = {
-                    '1': [],
-                    '2': [],
-                    '3': []
-                }
-
-                # let's check if every misspelled word before food can be similar to something in the dataset
-                for food in self.foods:
-                    if lev.distance(food, miss_word) <= 3:
-                        dst[str(lev.distance('Levenshtein', 'food'))].append(food)
-
-                # finally let's set the food preference giving priority to the one with less distance
-                if len(dst['1']) > 1:
-                    pref['food'] = dst['1']
-                else:
-                    if len(dst['2']) > 1:
-                        pref['food'] = dst['2']
+                if set(keywords[missing_pref]).issubset(set(words)):
+                    miss_word = ''
+                    if missing_pref != 'area':
+                        for indx in range(0, len(words)):
+                            if words[indx] == keywords[missing_pref][0]:
+                                miss_word = words[indx - 1]
                     else:
-                        if len(dst['3']) > 1:
-                            pref['food'] = dst['3']
+                        for indx in range(0, len(words)):
+                            if indx != 0 and [words[indx-1], words[indx]] == keywords[missing_pref]:
+                                miss_word = words[indx + 1]
 
-                # Add something to say that in case the word does not exist the user need to specify it
+                    # Check for matching with Levenshtein distance
+                    # more than distance 3 it will fail
+                    dst = {
+                        '1': [],
+                        '2': [],
+                        '3': []
+                    }
+
+                    # let's check if every misspelled word before food can be similar to something in the dataset
+                    for stuff in keyword_selection[missing_pref]:
+                        if lev.distance(stuff, miss_word) <= 3:
+                            #print(lev.distance(food, miss_word), lev.distance('Levenshtein', 'food'), food, miss_word)
+                            dst[str(lev.distance(stuff, miss_word))].append(stuff)
+
+                    # finally let's set the food preference giving priority to the one with less distance
+                    change_check = 0
+                    if len(dst['1']):
+                        for entry in dst['1']:
+                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+                            user_input = input("-----> ")
+                            utterance = self.evalueNewUtterance(user_input)
+                            while utterance != 'affirm' and utterance != 'negate':
+                                if utterance != 'repeat':
+                                    print("-----> Please answer the question.")
+                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+                                user_input = input("-----> ")
+                                utterance = self.evalueNewUtterance(user_input)
+                                print(utterance)
+                            if utterance == 'affirm':
+                                pref[missing_pref] = entry
+                                change_check = 1
+                                break
+
+                    elif len(dst['2']):
+                        for entry in dst['2']:
+                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+                            user_input = input("-----> ")
+                            utterance = self.evalueNewUtterance(user_input)
+                            while utterance != 'affirm' and utterance != 'negate':
+                                if utterance != 'repeat':
+                                    print("-----> Please answer the question")
+                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+                                user_input = input("-----> ")
+                                utterance = self.evalueNewUtterance(user_input)
+                                print(utterance)
+                            if utterance == 'affirm':
+                                pref[missing_pref] = entry
+                                change_check = 1
+                                break
+
+                    elif len(dst['3']):
+                        for entry in dst['3']:
+                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+                            user_input = input("-----> ")
+                            utterance = self.evalueNewUtterance(user_input)
+                            while utterance != 'affirm' and utterance != 'negate':
+                                if utterance != 'repeat':
+                                    print("-----> Please answer the question.")
+                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+                                user_input = input("-----> ")
+                                utterance = self.evalueNewUtterance(user_input)
+                                print(utterance)
+                            if utterance == 'affirm':
+                                change_check = 1
+                                pref[missing_pref] = entry
+                                break
+
+                    # Add something to say that in case the word does not exist the user need to specify it
+                    # P: something like this?
+                    if not change_check:
+                        print("-----> Either", miss_word, "does not occur in my database or something else went wrong.")
+                        print("-----> I apologize for the inconvenience. Please try something else.")
 
         return pref
