@@ -199,22 +199,31 @@ class Models:
             'pricerange': '',
             'area': '',
             'food': ''
-        }            
+        }
+
+        care = 'i dont care'
+        any = 'any'            
 
         # Look for the pricerange in the text
         for price in self.price_ranges:
+            if care or any in string:
+                pref['pricerange'] = any 
             if price in string:
                 pref['pricerange'] = price
                 break
 
         # Look for the area in the text
         for area in self.areas:
+            if care or any in string:
+                pref['area'] = any 
             if area in string:
                 pref['area'] = area
                 break
 
         # Look for the food in the text
         for food in self.foods:
+            if care or any in string:
+                pref['food'] = any
             if food in string:
                 pref['food'] = food
                 break
@@ -234,31 +243,78 @@ class Models:
                     if words[indx] == 'food':
                         miss_word = words[indx - 1]
 
-                # Check for matching with Levenshtein distance
-                # more than distance 3 it will fail
-                dst = {
-                    '1': [],
-                    '2': [],
-                    '3': []
-                }
-
                 # let's check if every misspelled word before food can be similar to something in the datase
                 for food in self.foods:
-                    if lev.distance(food, miss_word) <= 3:
-                        dst[str(lev.distance(food, miss_word))].append(food)
+                    option = self.levenshtein_option(food, miss_word)
+                    pref['food'] = option                         
+                    # This can also be 'not found'. Have to find a way to repeat the question
+                    # or ask the user to be more specific 
+    
+        if pref['area'] == '':
+                # Extract variable before keyword 'part'
+                words = string.split(" ")
 
-                # finally let's set the food preference giving priority to the one with less distance
-                if len(dst['1']) > 1:
-                    pref['food'] = dst['1']
-                else:
-                    if len(dst['2']) > 1:
-                        pref['food'] = dst['2']
-                    else:
-                        if len(dst['3']) > 1:
-                            pref['food'] = dst['3']
-                        #else:
+                if 'part' in words:
+                    miss_word = ''
+
+                    for indx in range(0, len(words)):
+                        if words[indx] == 'part':
+                            miss_word = words[indx - 1]
+
+                    # let's check if every misspelled word before part can be similar to something in the datase
+                    for area in self.areas:
+                        option = self.levenshtein_option(area, miss_word)
+                        pref['area'] = option 
+                        # This can also be 'not found'. Have to find a way to repeat the question
+                        # or ask the user to be more specific 
+        
+        if pref['pricerange'] == '':
+                # Extract variable before keyword 'restaurant'
+                words = string.split(" ")
+
+                if 'restaurant' in words:
+                    miss_word = ''
+
+                    for indx in range(0, len(words)):
+                        if words[indx] == 'restaurant':
+                            miss_word = words[indx - 1]
+
+                    # Check for matching with Levenshtein distance
+                    # more than distance 3 it will fail
 
 
-                # Add something to say that in case the word does not exist the user need to specify it
+                    # let's check if every misspelled word before restaurant can be similar to something in the datase
+                    for pricerange in self.price_ranges:
+                        option = self.levenshtein_option(pricerange, miss_word)
+                        pref['pricerange'] = option
+                        # This can also be 'not found'. Have to find a way to repeat the question
+                        # or ask the user to be more specific 
+                
+
+
 
         return pref
+    
+    def levenshtein_option(self, word_1, word_2):
+        
+        dst = {
+            '1': [],
+            '2': [],
+            '3': []
+                }
+        
+        if lev.distance(word_1, word_2) <= 3:
+            dst[str(lev.distance(word_1, word_2))].append(word_1)
+        
+        if len(dst['1']) > 1:
+            return dst['1']
+        else:
+            if len(dst['2']) > 1:
+                return dst['2']
+            else:
+                if len(dst['3']) > 1:
+                    return dst['3']
+                else:
+                    return 'not found'
+
+

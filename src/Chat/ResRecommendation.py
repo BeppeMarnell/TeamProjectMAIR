@@ -14,7 +14,8 @@ class ResRecommendation :
         self.preferences = preferences      
         self.rest_recom_df = pd.Dataframe(self.preferences, index=[0])
 
-        # If a preference is filled as 'any', then I assume it has the value 0
+        # If a preference is filled as 'any', then it becomes 0
+        self.rest_recom_df = self.rest_recom_df.replace(['any'], 0)
 
         # If one column == 0 or any, it returns True, otherwise False if none contains 0
         if self.rest_recom_df.isin([0]).any().any() == False:  #['pricerange'] != 0 & self.rest_recom_df['area'] != 0 & self.rest_recom_df['food'] != 0:
