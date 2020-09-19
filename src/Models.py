@@ -176,7 +176,28 @@ class Models:
                     if words[indx] == 'food':
                         miss_word = words[indx - 1]
 
-                pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
+                # Check for matching with Levenshtein distance
+                # more than distance 3 it will fail
+                dst = {
+                    '1': [],
+                    '2': [],
+                    '3': []
+                }
+
+                # let's check if every misspelled word before food can be similar to something in the dataset
+                for food in self.foods:
+                    if lev.distance(food, miss_word) <= 3:
+                        dst[str(lev.distance(food, miss_word))].append(food)
+
+                # finally let's set the food preference giving priority to the one with less distance
+                if len(dst['1']) > 1:
+                    pref['food'] = dst['1']
+                else:
+                    if len(dst['2']) > 1:
+                        pref['food'] = dst['2']
+                    else:
+                        if len(dst['3']) > 1:
+                            pref['food'] = dst['3']
 
         if pref['area'] == '':
             # Only use words in sentences that contain in (like in the center, ...)
