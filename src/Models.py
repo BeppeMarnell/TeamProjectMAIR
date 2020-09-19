@@ -212,28 +212,6 @@ class Models:
 
         return pref
 
-    # TODO fix method (not mandatory but nice to have)
-    # def negative_preferences(self, string):
-    #     """
-    #       This method evaluates strings in the form "not in the centre" and "no european food" and ensures that the
-    #       no is handled correctly (suggest everything except that part)
-    #     """
-    #     words = string.split(" ")
-    #     negative_words = ['no', 'not']
-    #     negation_indices = []
-    #     for negative_word in negative_words:
-    #         indices = [i for i, x in enumerate(words) if x == negative_word]
-    #         negation_indices.append(indices)
-    #     negation_indices = [item for sublist in negation_indices for item in sublist]
-    #     print(negation_indices)
-    #     for index in negation_indices:
-    #         if len(words) >= index+1:
-    #             miss_word = words[index+1]
-    #             print(miss_word)
-    #             pref = self.extractPreference(miss_word)
-    #             print(pref)
-    #             # price = self.get_levenshtein_items([miss_word], self.foods)
-
     def get_levenshtein_items(self, miss_words, possible_words):
         # Check for matching with Levenshtein distance
         # more than distance 3 it will fail
