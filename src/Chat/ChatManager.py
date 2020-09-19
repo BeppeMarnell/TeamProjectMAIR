@@ -22,6 +22,7 @@ class ChatManager:
 
         # Load the System utterances
         self.sys_utter = {}
+
         self.print_text = ""
 
         with open('assets/sys_utterances.txt', 'r') as inf:
@@ -324,3 +325,4 @@ class ChatManager:
         self.print_text = self.sys_utter['misunderstanding']
         print(self.print_text)
         return
+
