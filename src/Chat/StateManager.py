@@ -62,9 +62,6 @@ class StateManager:
         # All the possibilities should be here, based on the utterance,
         # the function will return the next state
 
-        # TODO: add special case, when in state S2,
-        #  then check for preferences before going on
-
         for s in self.__states:
             if s.state == state:
                 # special case if state is S2

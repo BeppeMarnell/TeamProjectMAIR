@@ -169,42 +169,46 @@ class Models:
         if pref['food'] == '':
             # Extract variable before keyword 'food'
             # words = string.split(" ")
+            keywords = ['food', 'kind']
+            for keyword in keywords:
+                if keyword in words:
+                    miss_word = ''
 
-            if 'food' in words:
-                miss_word = ''
+                    for indx in range(0, len(words)):
+                        if words[indx] == keyword:
+                            miss_word = words[indx - 1]
 
-                for indx in range(0, len(words)):
-                    if words[indx] == 'food':
-                        miss_word = words[indx - 1]
-
-                if miss_word == 'any' or miss_word == 'world':
-                    pref['food'] = 'any'
-                else:
-                    pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
+                    if miss_word == 'any' or miss_word == 'world':
+                        pref['food'] = 'any'
+                    else:
+                        pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
 
         if pref['area'] == '':
             # Only use words in sentences that contain in (like in the center, ...)
-            if 'in' in words:
-                miss_word = ''
+            keywords = ['in', 'area']
+            for keyword in keywords:
+                if keyword in words:
+                    miss_word = ''
 
-                for indx in range(0, len(words)):
-                    if words[indx] == 'in':
-                        if words[indx + 1] == 'the':
-                            miss_word = words[indx + 2]
-                # TODO find alternatives for any
-                if 'any' in words:
-                    pref['area'] = 'any'
-                else:
-                    pref['area'] = self.get_levenshtein_items([miss_word], self.areas)
+                    for indx in range(0, len(words)):
+                        if words[indx] == keyword:
+                            if words[indx + 1] == 'the':
+                                miss_word = words[indx + 2]
+                    # TODO find alternatives for any
+                    if 'any' in words:
+                        pref['area'] = 'any'
+                    else:
+                        pref['area'] = self.get_levenshtein_items([miss_word], self.areas)
 
         if pref['pricerange'] == '':
             # TODO find keywords
-
-            if 'price' in words:
-                if 'any' == words[words.index('price') - 1]:
-                    pref['pricerange'] = 'any'
-            else:
-                pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
+            keywords = ['price', 'restaurant', 'priced']
+            for keyword in keywords:
+                if keyword in words:
+                    if 'any' == words[words.index(keyword) - 1]:
+                        pref['pricerange'] = 'any'
+                    else:
+                        pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
 
         return pref
 
@@ -236,9 +240,7 @@ class Models:
 
         # remove all stopwords to not get a close distance to words like 'the'
         stop_words = set(stopwords.words('english'))
-        # print(miss_words)
         miss_words = [w for w in miss_words if w not in stop_words]
-        # print(miss_words)
 
         dst = {
             '1': [],
@@ -300,13 +302,10 @@ class Models:
         if not set(self.restaurants):
             self.lookup_in_restaurant_info(preferences)
         self.recommendation = self.recommend_restaurant()
-        # print(self.recommendation)
 
     def extract_details(self, string):
         string = string.lower()
         requested = []
-        # TODO add restaurant, name, price, type, address, number as keywords
-        # details = ["restaurantname", "pricerange", "area", "food", "phone", "addr", "postcode"]
         details = {"restaurantname": ["name", "restaurantname", "restaurant"],
                    "pricerange": ["price", "pricerange", "cost", "how much"],
                    "area": ["area", "city", "part", "region"],
