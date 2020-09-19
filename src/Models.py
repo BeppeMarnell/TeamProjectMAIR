@@ -308,7 +308,7 @@ class Models:
                                 pref['pricerange'] = 'any'
                             else:
                                 pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
-                '''
+        '''
         return pref
 
     def get_levenshtein_items(self, miss_words, possible_words):
