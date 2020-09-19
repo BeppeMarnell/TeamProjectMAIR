@@ -156,7 +156,8 @@ class ChatManager:
             confirmfalse = 'confirmfalse'
             recommend = False
 
-            if self.state == State.S3 or self.state == State.S4:
+            if (self.state == State.S3 or self.state == State.S4) and len(self.models.recommendation) != 0 \
+                    and self.models.recommendation[0] != -1:
                 # if user has restaurant recommended, use the info from that place rather than the search preference
                 food_pref = self.models.recommendation['food']
                 area_pref = self.models.recommendation['area']
@@ -252,6 +253,22 @@ class ChatManager:
             return
 
         if utterance == 'negate':
+            # no in any area or no i want korean food
+            # Update preferences and state
+            new_preferences = self.models.extractPreference(user_input)
+            # Change preferences where necessary
+            if new_preferences['food'] != '':
+                self.pref_df.at[0, 'food'] = new_preferences['food']
+                self.models.restaurants = []
+
+            if new_preferences['area'] != '':
+                self.pref_df.at[0, 'area'] = new_preferences['area']
+                self.models.restaurants = []
+
+            if new_preferences['pricerange'] != '':
+                self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
+                self.models.restaurants = []
+
             # TODO add possibility to choose "not korean food" or "not in the center"
             # new_preferences = self.models.negative_preferences(user_input)
             return
