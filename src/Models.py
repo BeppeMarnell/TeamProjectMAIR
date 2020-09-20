@@ -8,6 +8,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 import Levenshtein as lev
+import nltk
+from nltk.corpus import stopwords
 
 
 class Models:
@@ -21,16 +23,24 @@ class Models:
         self.areas = self.dataset.restaurant_info_df['area'].unique() #unique restaurant areas 
         self.foods = self.dataset.restaurant_info_df['food'].unique() #unique restaurant foods 
 
+        self.restaurants = pd.DataFrame()
+        self.recommendation = None
+        self.index = -1
+
+        # TODO: here you can activate and deactivate the models
         self.models = {
             'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
-            #'decTree': DecisionTreeClassifier(),
-            #'SVM': SVC(gamma='scale', probability=True, C=1),
-            #'multiNB': MultinomialNB(),
-            #'kNeigh': KNeighborsClassifier(n_neighbors=3)
+            # 'decTree': DecisionTreeClassifier(),
+            # 'SVM': SVC(gamma='scale', probability=True, C=1),
+            # 'multiNB': MultinomialNB(),
+            # 'kNeigh': KNeighborsClassifier(n_neighbors=3)
         }
 
         # Set some variables
-        self.singleModel = False
+
+        # TODO: Here you can activate if you'd like one or multiple models at the same time
+        # TODO: From task 1.b on, it is not possible to have multiple models
+        self.singleModel = True
         self.singleModelName = 'logReg'  # Default one
 
         self.baseline1 = baseline1
@@ -46,7 +56,6 @@ class Models:
         # LOGs
         print('-----> All models have been loaded and trained on BOW \n')
         self.endLoading = True
-
 
     def showPerformances(self):
         self.endLoading = False
@@ -165,6 +174,7 @@ class Models:
         return 'not found'
 
     def evalueNewUtterance(self, utterance):
+        # TODO: Implement other baselines in a more thoughtful way
         # Implement baseline
         if self.baseline1:
             return 'inform'
@@ -293,6 +303,36 @@ class Models:
 
 
 
+    def get_levenshtein_items(self, miss_words, possible_words):
+        # Check for matching with Levenshtein distance
+        # more than distance 3 it will fail
+        # remove all stopwords to not get a close distance to words like 'the'
+        stop_words = set(stopwords.words('english'))
+        miss_words = [w for w in miss_words if w not in stop_words]
+
+        dst = {
+            '1': [],
+            '2': [],
+            '3': []
+        }
+        for miss_word in miss_words:
+            # let's check if every misspelled word before food can be similar to something in the dataset
+            for word in possible_words:
+                if lev.distance(word, miss_word) <= 3:
+                    dst[str(lev.distance(word, miss_word))].append(word)
+        pref = []
+        # finally let's set the preference giving priority to the one with less distance
+        if len(dst['1']) >= 1:
+            pref = dst['1'][0]
+        else:
+            if len(dst['2']) >= 1:
+                pref = dst['2'][0]
+            else:
+                if len(dst['3']) >= 1:
+                    pref = dst['3'][0]
+                else:
+                    return ''
+                    # TODO set state to request more info (set string saying name is not recognized)
         return pref
     
     def levenshtein_option(self, word_1, word_2):
