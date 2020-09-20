@@ -12,8 +12,9 @@ class StateManager:
         s3 = StateNode(State.S3)
         s4 = StateNode(State.S4)
         s5 = StateNode(State.S5)
+        s6 = StateNode(State.S6)
 
-        self.__states = [s1, s2, s3, s4, s5]
+        self.__states = [s1, s2, s3, s4, s5, s6]
 
         e12 = Edge(s2, ['inform', 'reqalts', 'negate', 'deny', 'reqmore'])
         e11 = Edge(s1, ['confirm', 'affirm', 'request', 'null', 'hello', 'repeat', 'ack', 'restart', 'thankyou'])
@@ -34,10 +35,6 @@ class StateManager:
         s2.addEdge(e23)
         s2.addEdge(e25)
 
-        # if yes moves to state 5, then you cannot say yes, then ask for more infos.
-        # Need state 6 as final state, only if you say goodbye or thank you
-        # State 5: restaurant is pretty safe, (has been ack or more details have been requested)
-        #  if alternative is asked, switch to S4
         e31 = Edge(s1, ['restart', 'hello'])
         e32 = Edge(s2, ['inform'])
         e33 = Edge(s3, ['confirm', 'repeat', 'deny', 'negate', 'reqmore', 'reqalts', 'thankyou'])
@@ -57,6 +54,16 @@ class StateManager:
         s4.addEdge(e44)
         s4.addEdge(e41)
         s4.addEdge(e45)
+
+        # extra Node just for processing yes/no questions
+        e63 = Edge(s3, ['affirm', 'ack', 'reqalts', 'inform'])
+        e66 = Edge(s6, ['negate', 'confirm', 'request', 'repeat', 'null', 'deny', 'reqmore'])
+        e61 = Edge(s1, ['restart', 'hello'])
+        e65 = Edge(s5, ['bye', 'thankyou'])
+        s6.addEdge(e63)
+        s6.addEdge(e66)
+        s6.addEdge(e61)
+        s6.addEdge(e65)
 
     def processState(self, state, utterance, preferences):
         # All the possibilities should be here, based on the utterance,
@@ -82,6 +89,7 @@ class State(Enum):
     S3 = 3,
     S4 = 4,
     S5 = 5,
+    S6 = 6
 
 
 class StateNode:
