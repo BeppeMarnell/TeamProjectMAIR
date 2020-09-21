@@ -68,6 +68,13 @@ class ChatManager:
             # if new state is S3, look up possible restaurants, that will be recommended in self.SystemStateUtterance()
             # ensure that current state is either S3 or the utterance asks for another result
             # otherwise, it would recommend a different restaurant even though the user just asked for confirmation
+            if new_state == State.S2 and self.state == State.S3 and utterance == 'deny' and user_input == 'wrong':
+                print('-----> We can restart if it is wrong')
+            
+            elif new_state == State.S2 and self.state == State.S3 and utterance == 'deny':
+                print('-----> Okay then we will take that into account')
+                #print(self.pref_df)
+            
             if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'):
                 self.models.recommend(self.pref_df)
 
