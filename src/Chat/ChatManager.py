@@ -229,8 +229,24 @@ class ChatManager:
             return
 
         if utterance == 'deny':
-            # TODO? This utterance never appears in the dialog_acts
-            pass
+        # Wrong
+        # I dont want 
+            user_input_split = user_input.split()
+            for i in user_input_split: 
+                if i == 'dont':
+                    #print('succes')
+                    for preferences in ['food', 'area', 'pricerange']:
+                        if self.pref_df[preferences].tolist()[0] in user_input:
+                            self.pref_df[preferences] = ''
+                            self.models.restaurants = []
+                            return
+
+                if i == 'wrong':
+                    for preferences in ['food', 'area', 'pricerange']:
+                        #if self.pref_df[preferences].tolist()[0] in user_input:
+                        self.pref_df[preferences] = ''
+                        self.models.restaurants = []
+                        return 
 
         if utterance == 'hello':
             # don't need to do anything, will automatically restart the conversation
