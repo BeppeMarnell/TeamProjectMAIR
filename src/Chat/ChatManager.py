@@ -138,7 +138,7 @@ class ChatManager:
     def react_to_utterance(self, utterance, user_input):
         if utterance == 'ack':
             # same as affirm
-            if self.state == State.S3:
+            if self.state == State.S3 and len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
                                                                    self.models.recommendation['restaurantname'])
                 print(self.print_text)
@@ -146,7 +146,7 @@ class ChatManager:
 
         if utterance == 'affirm':
             # same as ack
-            if self.state == State.S3:
+            if self.state == State.S3 and len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
                                                                    self.models.recommendation['restaurantname'])
                 print(self.print_text)
