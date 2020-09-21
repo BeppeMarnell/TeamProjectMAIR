@@ -102,7 +102,7 @@ class Models:
         predicted = model.predict(self.dataset.x_test)
         return np.mean(predicted == self.dataset.y_test)
 
-    def setSingleModel(self, singleModel=True, name='logReg'):
+    def setSingleModel(self, singleModel=True, name='multiNB'):
         self.singleModel = singleModel
         self.singleModelName = name
 
