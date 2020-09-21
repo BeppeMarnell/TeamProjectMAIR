@@ -28,10 +28,10 @@ class Models:
 
         # TODO: here you can activate and deactivate the models
         self.models = {
-            'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
+            # 'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
             # 'decTree': DecisionTreeClassifier(),
             # 'SVM': SVC(gamma='scale', probability=True, C=1),
-            # 'multiNB': MultinomialNB(),
+            'multiNB': MultinomialNB(),
             # 'kNeigh': KNeighborsClassifier(n_neighbors=3)
         }
 
@@ -209,16 +209,7 @@ class Models:
                     change_check = 0
                     if len(dst['1']):
                         for entry in dst['1']:
-                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                            user_input = input("-----> ")
-                            utterance = self.evalueNewUtterance(user_input)
-                            while utterance != 'affirm' and utterance != 'negate':
-                                if utterance != 'repeat':
-                                    print("-----> Please answer the question.")
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                print(utterance)
+                            utterance = self.__patternMatchingRequest(miss_word, entry)
                             if utterance == 'affirm':
                                 pref[missing_pref] = entry
                                 change_check = 1
@@ -226,16 +217,7 @@ class Models:
 
                     elif len(dst['2']):
                         for entry in dst['2']:
-                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                            user_input = input("-----> ")
-                            utterance = self.evalueNewUtterance(user_input)
-                            while utterance != 'affirm' and utterance != 'negate':
-                                if utterance != 'repeat':
-                                    print("-----> Please answer the question")
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                print(utterance)
+                            utterance = self.__patternMatchingRequest(miss_word, entry)
                             if utterance == 'affirm':
                                 pref[missing_pref] = entry
                                 change_check = 1
@@ -243,16 +225,7 @@ class Models:
 
                     elif len(dst['3']):
                         for entry in dst['3']:
-                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                            user_input = input("-----> ")
-                            utterance = self.evalueNewUtterance(user_input)
-                            while utterance != 'affirm' and utterance != 'negate':
-                                if utterance != 'repeat':
-                                    print("-----> Please answer the question.")
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                print(utterance)
+                            utterance = self.__patternMatchingRequest(miss_word, entry)
                             if utterance == 'affirm':
                                 change_check = 1
                                 pref[missing_pref] = entry
@@ -310,6 +283,24 @@ class Models:
                                 pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
         '''
         return pref
+
+    def __patternMatchingRequest(self, miss_word, entry):
+        # If the user writes something that could resemble a word in the dataset,
+        # it is asked if the matched word is what the user meant
+
+        print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+        user_input = input("-----> ")
+        utterance = self.evalueNewUtterance(user_input)
+
+        while utterance != 'affirm' and utterance != 'negate':
+            if utterance != 'repeat':
+                print("-----> Please answer the question.")
+            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+            user_input = input("-----> ")
+            utterance = self.evalueNewUtterance(user_input)
+            print(utterance)
+
+        return utterance
 
     def get_levenshtein_items(self, miss_words, possible_words):
         # Check for matching with Levenshtein distance
