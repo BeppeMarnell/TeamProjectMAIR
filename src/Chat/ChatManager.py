@@ -68,6 +68,13 @@ class ChatManager:
             # if new state is S3, look up possible restaurants, that will be recommended in self.SystemStateUtterance()
             # ensure that current state is either S3 or the utterance asks for another result
             # otherwise, it would recommend a different restaurant even though the user just asked for confirmation
+            if new_state == State.S2 and self.state == State.S3 and utterance == 'deny' and user_input == 'wrong':
+                print('-----> We will restart because it is wrong')
+            
+            elif new_state == State.S2 and self.state == State.S3 and utterance == 'deny':
+                print('-----> Okay then we will take that into account')
+                #print(self.pref_df)
+            
             if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'):
                 self.models.recommend(self.pref_df)
 
@@ -229,8 +236,24 @@ class ChatManager:
             return
 
         if utterance == 'deny':
-            # TODO? This utterance never appears in the dialog_acts
-            pass
+        # Wrong
+        # I dont want 
+            user_input_split = user_input.split()
+            for i in user_input_split: 
+                if i == 'dont':
+                    #print('succes')
+                    for preferences in ['food', 'area', 'pricerange']:
+                        if self.pref_df[preferences].tolist()[0] in user_input:
+                            self.pref_df[preferences] = ''
+                            self.models.restaurants = []
+                            return
+
+                if i == 'wrong':
+                    for preferences in ['food', 'area', 'pricerange']:
+                        #if self.pref_df[preferences].tolist()[0] in user_input:
+                        self.pref_df[preferences] = ''
+                        self.models.restaurants = []
+                        return 
 
         if utterance == 'hello':
             # don't need to do anything, will automatically restart the conversation

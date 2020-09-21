@@ -40,7 +40,7 @@ class Models:
         # TODO: Here you can activate if you'd like one or multiple models at the same time
         # TODO: From task 1.b on, it is not possible to have multiple models
         self.singleModel = True
-        self.singleModelName = 'multiNB'  # Default one
+        self.singleModelName = 'logReg'  # Default one
 
         self.baseline1 = baseline1
         self.baseline2 = baseline2
@@ -102,7 +102,7 @@ class Models:
         predicted = model.predict(self.dataset.x_test)
         return np.mean(predicted == self.dataset.y_test)
 
-    def setSingleModel(self, singleModel=True, name='multiNB'):
+    def setSingleModel(self, singleModel=True, name='logReg'):
         self.singleModel = singleModel
         self.singleModelName = name
 
@@ -250,42 +250,31 @@ class Models:
                                     change_check = 1
                                     track_replaced += [miss_word]
                                     break
+                    # finally let's set the food preference giving priority to the one with less distance
+                    change_check = 0
+                    if len(dst['1']):
+                        for entry in dst['1']:
+                            utterance = self.__patternMatchingRequest(miss_word, entry)
+                            if utterance == 'affirm':
+                                pref[missing_pref] = entry
+                                change_check = 1
+                                break
 
-                        elif len(dst['2']):
-                            for entry in dst['2']:
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                while utterance != 'affirm' and utterance != 'negate':
-                                    if utterance != 'repeat':
-                                        print("-----> Please answer the question")
-                                    print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                    user_input = input("-----> ")
-                                    utterance = self.evalueNewUtterance(user_input)
-                                    print(utterance)
-                                if utterance == 'affirm':
-                                    pref[missing_pref] = entry
-                                    change_check = 1
-                                    track_replaced += [miss_word]
-                                    break
+                    elif len(dst['2']):
+                        for entry in dst['2']:
+                            utterance = self.__patternMatchingRequest(miss_word, entry)
+                            if utterance == 'affirm':
+                                pref[missing_pref] = entry
+                                change_check = 1
+                                break
 
-                        elif len(dst['3']):
-                            for entry in dst['3']:
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                while utterance != 'affirm' and utterance != 'negate':
-                                    if utterance != 'repeat':
-                                        print("-----> Please answer the question.")
-                                    print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                    user_input = input("-----> ")
-                                    utterance = self.evalueNewUtterance(user_input)
-                                    print(utterance)
-                                if utterance == 'affirm':
-                                    change_check = 1
-                                    pref[missing_pref] = entry
-                                    track_replaced += [miss_word]
-                                    break
+                    elif len(dst['3']):
+                        for entry in dst['3']:
+                            utterance = self.__patternMatchingRequest(miss_word, entry)
+                            if utterance == 'affirm':
+                                change_check = 1
+                                pref[missing_pref] = entry
+                                break
 
                         # Add something to say that in case the word does not exist the user need to specify it
                         if not change_check:
@@ -340,6 +329,23 @@ class Models:
         '''
         return pref
 
+    def __patternMatchingRequest(self, miss_word, entry):
+        # If the user writes something that could resemble a word in the dataset,
+        # it is asked if the matched word is what the user meant
+
+        print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+        user_input = input("-----> ")
+        utterance = self.evalueNewUtterance(user_input)
+
+        while utterance != 'affirm' and utterance != 'negate':
+            if utterance != 'repeat':
+                print("-----> Please answer the question.")
+            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+            user_input = input("-----> ")
+            utterance = self.evalueNewUtterance(user_input)
+            print(utterance)
+
+        return utterance
 
     def get_levenshtein_items(self, miss_words, possible_words):
         # Check for matching with Levenshtein distance
