@@ -40,7 +40,7 @@ class Models:
         # TODO: Here you can activate if you'd like one or multiple models at the same time
         # TODO: From task 1.b on, it is not possible to have multiple models
         self.singleModel = True
-        self.singleModelName = 'logReg'  # Default one
+        self.singleModelName = 'multiNB' # 'logReg'  # Default one
 
         self.baseline1 = baseline1
         self.baseline2 = baseline2
@@ -102,7 +102,7 @@ class Models:
         predicted = model.predict(self.dataset.x_test)
         return np.mean(predicted == self.dataset.y_test)
 
-    def setSingleModel(self, singleModel=True, name='logReg'):
+    def setSingleModel(self, singleModel=True, name='multiNB'):
         self.singleModel = singleModel
         self.singleModelName = name
 
@@ -235,46 +235,27 @@ class Models:
                         change_check = 0
                         if len(dst['1']):
                             for entry in dst['1']:
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                while utterance != 'affirm' and utterance != 'negate':
-                                    if utterance != 'repeat':
-                                        print("-----> Please answer the question.")
-                                    print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                    user_input = input("-----> ")
-                                    utterance = self.evalueNewUtterance(user_input)
-                                    print(utterance)
+                                utterance = self.__patternMatchingRequest(miss_word, entry)
                                 if utterance == 'affirm':
                                     pref[missing_pref] = entry
                                     change_check = 1
-                                    track_replaced += [miss_word]
                                     break
-                    # finally let's set the food preference giving priority to the one with less distance
-                    change_check = 0
-                    if len(dst['1']):
-                        for entry in dst['1']:
-                            utterance = self.__patternMatchingRequest(miss_word, entry)
-                            if utterance == 'affirm':
-                                pref[missing_pref] = entry
-                                change_check = 1
-                                break
 
-                    elif len(dst['2']):
-                        for entry in dst['2']:
-                            utterance = self.__patternMatchingRequest(miss_word, entry)
-                            if utterance == 'affirm':
-                                pref[missing_pref] = entry
-                                change_check = 1
-                                break
+                        elif len(dst['2']):
+                            for entry in dst['2']:
+                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                if utterance == 'affirm':
+                                    pref[missing_pref] = entry
+                                    change_check = 1
+                                    break
 
-                    elif len(dst['3']):
-                        for entry in dst['3']:
-                            utterance = self.__patternMatchingRequest(miss_word, entry)
-                            if utterance == 'affirm':
-                                change_check = 1
-                                pref[missing_pref] = entry
-                                break
+                        elif len(dst['3']):
+                            for entry in dst['3']:
+                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                if utterance == 'affirm':
+                                    change_check = 1
+                                    pref[missing_pref] = entry
+                                    break
 
                         # Add something to say that in case the word does not exist the user need to specify it
                         if not change_check:
