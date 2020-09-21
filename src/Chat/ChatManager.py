@@ -69,7 +69,7 @@ class ChatManager:
             # ensure that current state is either S3 or the utterance asks for another result
             # otherwise, it would recommend a different restaurant even though the user just asked for confirmation
             if new_state == State.S2 and self.state == State.S3 and utterance == 'deny' and user_input == 'wrong':
-                print('-----> We can restart if it is wrong')
+                print('-----> We will restart because it is wrong')
             
             elif new_state == State.S2 and self.state == State.S3 and utterance == 'deny':
                 print('-----> Okay then we will take that into account')
