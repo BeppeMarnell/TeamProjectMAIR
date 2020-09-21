@@ -57,9 +57,9 @@ class StateManager:
 
         # extra Node just for processing yes/no questions
         e63 = Edge(s3, ['affirm', 'ack', 'reqalts', 'inform'])
-        e66 = Edge(s6, ['negate', 'confirm', 'request', 'repeat', 'null', 'deny', 'reqmore'])
+        e66 = Edge(s6, ['negate', 'confirm', 'request', 'repeat', 'null', 'deny', 'reqmore', 'thankyou'])
         e61 = Edge(s1, ['restart', 'hello'])
-        e65 = Edge(s5, ['bye', 'thankyou'])
+        e65 = Edge(s5, ['bye'])
         s6.addEdge(e63)
         s6.addEdge(e66)
         s6.addEdge(e61)

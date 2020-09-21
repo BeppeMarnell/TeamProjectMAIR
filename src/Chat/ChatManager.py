@@ -30,6 +30,8 @@ class ChatManager:
         self.recommended_category = ''
         self.new_type = ''
         self.possible_options = []
+        self.negative_utterances = ['negate', 'deny']
+        self.positive_utterances = ['affirm', 'ack']
 
         with open('assets/sys_utterances.txt', 'r') as inf:
             for line in inf:
@@ -76,29 +78,30 @@ class ChatManager:
             # otherwise, it would recommend a different restaurant even though the user just asked for confirmation
             if new_state == State.S3:
                 if (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'
-                        or utterance == 'negate'):
+                        or utterance in self.negative_utterances):
                     self.models.recommend(self.pref_df)
 
-                if len(self.models.recommendation) == 0 and utterance == 'affirm' and self.state != State.S6:
+                if len(self.models.recommendation) == 0 and utterance in self.positive_utterances \
+                        and self.state != State.S6:
                     # user is prompted with the question to restart. If utterance is affirm, go back to state 1
                     new_state = State.S1
 
-                if len(self.models.recommendation) == 0 and utterance == 'negate':
+                if len(self.models.recommendation) == 0 and utterance in self.negative_utterances:
                     # if user chooses to not restart, the user is prompted with a suggestion
                     # (see Models.py propose_alternative_type). The state is then changed to S6, a state for just
                     # answering yes or no questions (no = stay on this state, yes = move to state 3)
                     new_state = State.S6
 
-            # print('')
-            # print('utterance: ')
-            # print(utterance)
-            # # print(new_preferences)
-            # print('preference: ')
-            # print(self.pref_df.loc[0])
-            # print('current state: ')
-            # print(self.state)
-            # print('new state: ')
-            # print(new_state)
+            print('')
+            print('utterance: ')
+            print(utterance)
+            # print(new_preferences)
+            print('preference: ')
+            print(self.pref_df.loc[0])
+            print('current state: ')
+            print(self.state)
+            print('new state: ')
+            print(new_state)
 
             self.state = new_state
 
@@ -152,15 +155,15 @@ class ChatManager:
 
     def react_to_utterance(self, utterance, user_input):
         # checks whether the recommendation is set (not empty)
-        if utterance == 'ack':
-            # same as affirm
-            if self.state == State.S3:
-                self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
-                                                                   self.models.recommendation['restaurantname'])
-                print(self.print_text)
-                return
+        # if utterance == 'ack':
+        #     # same as affirm
+        #     if self.state == State.S3:
+        #         self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
+        #                                                            self.models.recommendation['restaurantname'])
+        #         print(self.print_text)
+        #         return
 
-        if utterance == 'affirm':
+        if utterance in self.positive_utterances:
             # same as ack
             if self.state == State.S3 and len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
@@ -268,8 +271,16 @@ class ChatManager:
             return
 
         if utterance == 'deny':
-            # TODO
-            pass
+            # TODO add possibility to choose "i dont want indian food"
+            if self.state == State.S3 and len(self.models.recommendation) == 0:
+                # self.recommended_category, self.new_preferences_df, self.new_type = self.models.\
+                #     propose_alternative_type(self.pref_df)
+                self.possible_options = self.models.propose_alternative_type(self.pref_df)
+                self.recommended_category, self.new_type = self.models.choose_proposal(self.possible_options)
+
+            if self.state == State.S6:
+                self.recommended_category, self.new_type = self.models.choose_proposal(self.possible_options)
+            return
 
         if utterance == 'hello':
             # don't need to do anything, will automatically restart the conversation
@@ -328,7 +339,6 @@ class ChatManager:
 
             if self.state == State.S6:
                 self.recommended_category, self.new_type = self.models.choose_proposal(self.possible_options)
-            # TODO add possibility to choose "not korean food" or "not in the center"
             # new_preferences = self.models.negative_preferences(user_input)
             return
 
