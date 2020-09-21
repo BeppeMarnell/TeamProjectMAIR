@@ -39,8 +39,8 @@ class StateManager:
         # State 5: restaurant is pretty safe, (has been ack or more details have been requested)
         #  if alternative is asked, switch to S4
         e31 = Edge(s1, ['restart', 'hello'])
-        e32 = Edge(s2, ['inform'])
-        e33 = Edge(s3, ['confirm', 'repeat', 'deny', 'negate', 'reqmore', 'reqalts', 'thankyou'])
+        e32 = Edge(s2, ['inform', 'deny'])
+        e33 = Edge(s3, ['confirm', 'repeat', 'negate', 'reqmore', 'reqalts', 'thankyou'])
         e34 = Edge(s4, ['request', 'ack', 'affirm', 'null'])
         e35 = Edge(s5, ['bye'])
         s3.addEdge(e31)

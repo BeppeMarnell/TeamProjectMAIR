@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import metrics
+from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -9,6 +10,7 @@ from sklearn.tree import DecisionTreeClassifier
 import Levenshtein as lev
 import nltk
 from nltk.corpus import stopwords
+import re
 
 
 class Models:
@@ -28,11 +30,12 @@ class Models:
 
         # TODO: here you can activate and deactivate the models
         self.models = {
-            'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
+            
+            #'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
             # 'decTree': DecisionTreeClassifier(),
             # 'SVM': SVC(gamma='scale', probability=True, C=1),
-            # 'multiNB': MultinomialNB(),
-            # 'kNeigh': KNeighborsClassifier(n_neighbors=3)
+             'multiNB': MultinomialNB(),
+            #'kNeigh': KNeighborsClassifier(n_neighbors=3)
         }
 
         # Set some variables
@@ -40,7 +43,7 @@ class Models:
         # TODO: Here you can activate if you'd like one or multiple models at the same time
         # TODO: From task 1.b on, it is not possible to have multiple models
         self.singleModel = True
-        self.singleModelName = 'logReg'  # Default one
+        self.singleModelName = 'multiNB'  # Default one
 
         self.baseline1 = baseline1
         self.baseline2 = baseline2
@@ -58,6 +61,14 @@ class Models:
 
     def showPerformances(self):
         self.endLoading = False
+
+        if self.baseline2:
+            print('-----> baseline 2')
+            dialog_act = []
+            for example in self.dataset.x_test:
+                dialog_act.append(self.baseline2_expressions(example))
+            accurate = accuracy_score(self.dataset.y_test, dialog_act)
+            print(''.join(['-----> Accuracy: ', str(accurate)]))
 
         if self.singleModel:
             # Calculate performance for single model
@@ -102,18 +113,18 @@ class Models:
         predicted = model.predict(self.dataset.x_test)
         return np.mean(predicted == self.dataset.y_test)
 
-    def setSingleModel(self, singleModel=True, name='logReg'):
+    def setSingleModel(self, singleModel=True, name='multiNB'):
         self.singleModel = singleModel
         self.singleModelName = name
 
     def evalueNewUtterance(self, utterance):
-        # TODO: Implement other baselines in a more thoughtful way
         # Implement baseline
         if self.baseline1:
             return 'inform'
 
-        if self.baseline2 and ('have a nice' in utterance):
-            return 'bye'
+        # Second baseline
+        if self.baseline2:
+            return self.baseline2_expressions(utterance)
 
         # Evaluate the new utterance
         if self.singleModel:
@@ -131,6 +142,72 @@ class Models:
                 print(''.join(['----->']))
 
         print('')
+    
+    def baseline2_expressions(self, utterance):
+        # Use regular expressions or key-words to classify the dialog act in baseline 2
+        ack = re.search("okay|um|ok|umh|ah", utterance)
+        affirm = re.search("yes|right|alright|yeah|perfect|correct|cool|nice|awesome|great|sounds", utterance)
+        bye = re.search("good bye|bye|darling|dear|goodb|[a-z]*bye", utterance)
+        confirm = re.search("is it|said|yea", utterance)
+        deny = re.search("alternative|dont|not|cannot|doesnt|shitty|suck|sucks|hate|wrong|fuck", utterance)
+        hello = re.search("^hello|^hi|^hey|^halo", utterance)
+        inform = re.search("food|christmas|asian|west|north|east|south|thai[a-z]*|austra[a_z]*|chin[a-z]+|want[a-z]*|ita[a-z]*|exp[a-z]+|veg[e\-i]tarian|recommend|french|information|downtown|looking|searching|help|serve[a-z]+|rest[a-z][a-z]+|viet[a-z]*|seafood|food|turki[a-z]+|cheap|pizza|moder[a-z]+|kitchen|oriental|mexican|child|european", utterance)
+        negate = re.search("not|any", utterance)
+        null = re.search("hm|sil|mmhmm|ringing|laugh[a-z]*|huh|sigh|missing|inaudible|cough|oh|noise|yawning|tv_noise|uh|background_speech|breath", utterance)
+        repeat = re.search("sorry|repeat|again|answer", utterance)
+        reqalts = re.search("anything|how about|what about|alternative|different|asian", utterance)
+        reqmore = re.search("more|suggestions", utterance)
+        request = re.search("their|may|pri[sc]e|wheres|what is|whats|nu[a-z]*|options|ad[a-z]*|post[a-z]*|locat[a-z]+|range|venue", utterance)
+        restart = re.search("start over|nevermind|restart", utterance)
+        thankyou = re.search("thank you|welcome|thank|thanks|day|good[a-z]*|afternoon", utterance)
+
+            
+        if affirm !=None:
+            return 'affirm'
+
+        if ack != None:
+            return 'ack'
+            
+        if bye !=None:
+            return 'bye'
+        
+        if confirm != None:
+            return 'confirm'
+        
+        if deny != None:
+            return 'deny'
+        
+        if hello != None:
+            return 'hello'
+        
+        if inform != None:
+            return 'inform'
+        
+        if negate != None:
+            return 'negate'
+        
+        if null != None:
+            return 'null'
+        
+        if repeat != None:
+            return 'repeat'
+        
+        if reqalts != None:
+            return 'reqalts'
+        
+        if reqmore != None:
+            return 'reqmore'
+        
+        if request != None:
+            return 'request'
+        
+        if restart != None:
+            return 'restart'
+        
+        if thankyou != None:
+            return 'thankyou'
+        
+        return 'not found'
 
     def extractPreference(self, string):
         # Lower the string in input
@@ -168,8 +245,15 @@ class Models:
 
         for missing_pref in ['food', 'area', 'pricerange']:
 
+            #words = string.split(" ")
+
             if pref[missing_pref] == '':
                 # TODO: p: expand this
+
+                if 'any' in string:
+                    pref[missing_pref] = 'any'
+                    break 
+
                 keywords = {'food': ['food'], 'area': ['in', 'the'], 'pricerange': ['priced']}
                 keyword_selection = {'food': self.foods, 'area': self.areas, 'pricerange': self.price_ranges}
 
@@ -179,6 +263,10 @@ class Models:
                 # TODO: Add more rigorous any preference detection
                 if set(keywords[missing_pref]).issubset(set(words)):
                     miss_word = ''
+
+                    #if 'any' in string:
+                    #    pref[missing_pref] = 'any'
+                        
                     if missing_pref != 'area':
                         for indx in range(0, len(words)):
                             if words[indx] == keywords[missing_pref][0]:

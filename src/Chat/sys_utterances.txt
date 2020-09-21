@@ -15,6 +15,5 @@ confirmfalserest -----> No, the preference_name of restaurant_name is preference
 affirm -----> You chose restaurant_name. Would you like to know more details about it?
 misunderstanding -----> Sorry, I could not understand what you said, please repeat it.
 restart -----> Restarting from the beginning.
-deny -----> I am sorry, what are your correct restaurant preferences?
 bye -----> Thank you for using the MAIRDISY (MAIR DIalog SYstem). Good bye!
 
