@@ -30,10 +30,10 @@ class Models:
 
         # TODO: here you can activate and deactivate the models
         self.models = {
-            'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
+            # 'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
             # 'decTree': DecisionTreeClassifier(),
             # 'SVM': SVC(gamma='scale', probability=True, C=1),
-            # 'multiNB': MultinomialNB(),
+            'multiNB': MultinomialNB(),
             # 'kNeigh': KNeighborsClassifier(n_neighbors=3)
         }
 
@@ -42,7 +42,7 @@ class Models:
         # TODO: Here you can activate if you'd like one or multiple models at the same time
         # TODO: From task 1.b on, it is not possible to have multiple models
         self.singleModel = True
-        self.singleModelName = 'logReg'  # Default one
+        self.singleModelName = 'multiNB'  # Default one
 
         self.baseline1 = baseline1
         self.baseline2 = baseline2
@@ -104,7 +104,7 @@ class Models:
         predicted = model.predict(self.dataset.x_test)
         return np.mean(predicted == self.dataset.y_test)
 
-    def setSingleModel(self, singleModel=True, name='logReg'):
+    def setSingleModel(self, singleModel=True, name='multiNB'):
         self.singleModel = singleModel
         self.singleModelName = name
 
@@ -167,7 +167,13 @@ class Models:
         # maybe there is a spelling error
 
         # TODO keywords matching here
+        distances = {
+            'pricerange': '',
+            'area': '',
+            'food': ''
+        }
 
+        change_found = 0
         for missing_pref in ['food', 'area', 'pricerange']:
 
             if pref[missing_pref] == '':
@@ -180,6 +186,7 @@ class Models:
 
                 # TODO: Add more rigorous any preference detection
                 if set(keywords[missing_pref]).issubset(set(words)):
+                    change_found = 1
                     miss_word = ''
                     if missing_pref != 'area':
                         for indx in range(0, len(words)):
@@ -195,7 +202,7 @@ class Models:
                         break
                     # Check for matching with Levenshtein distance
                     # more than distance 3 it will fail
-                    dst = {
+                    distances[missing_pref] = {
                         '1': [],
                         '2': [],
                         '3': []
@@ -205,145 +212,25 @@ class Models:
                     for stuff in keyword_selection[missing_pref]:
                         if lev.distance(stuff, miss_word) <= 3:
                             # print(lev.distance(food, miss_word), lev.distance('Levenshtein', 'food'), food, miss_word)
-                            dst[str(lev.distance(stuff, miss_word))].append(stuff)
+                            distances[missing_pref][str(lev.distance(stuff, miss_word))].append((stuff, miss_word))
+        if change_found:
+            return pref, distances
+        return pref, {}
 
-                    # finally let's set the food preference giving priority to the one with less distance
-                    change_check = 0
-                    if len(dst['1']):
-                        for entry in dst['1']:
-                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                            user_input = input("-----> ")
-                            utterance = self.evalueNewUtterance(user_input)
-                            while utterance != 'affirm' and utterance != 'negate':
-                                if utterance != 'repeat':
-                                    print("-----> Please answer the question.")
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                print(utterance)
-                            if utterance == 'affirm':
-                                pref[missing_pref] = entry
-                                change_check = 1
-                                break
-
-                    elif len(dst['2']):
-                        for entry in dst['2']:
-                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                            user_input = input("-----> ")
-                            utterance = self.evalueNewUtterance(user_input)
-                            while utterance != 'affirm' and utterance != 'negate':
-                                if utterance != 'repeat':
-                                    print("-----> Please answer the question")
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                print(utterance)
-                            if utterance == 'affirm':
-                                pref[missing_pref] = entry
-                                change_check = 1
-                                break
-
-                    elif len(dst['3']):
-                        for entry in dst['3']:
-                            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                            user_input = input("-----> ")
-                            utterance = self.evalueNewUtterance(user_input)
-                            while utterance != 'affirm' and utterance != 'negate':
-                                if utterance != 'repeat':
-                                    print("-----> Please answer the question.")
-                                print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
-                                user_input = input("-----> ")
-                                utterance = self.evalueNewUtterance(user_input)
-                                print(utterance)
-                            if utterance == 'affirm':
-                                change_check = 1
-                                pref[missing_pref] = entry
-                                break
-
-                    # Add something to say that in case the word does not exist the user need to specify it
-                    # P: something like this?
-                    if not change_check:
-                        print("-----> Either", miss_word, "does not occur in my database or something else went wrong.")
-                        print("-----> I apologize for the inconvenience. Please try something else.")
-        '''
-                words = string.split(" ")
-                if pref['food'] == '':
-                    # Extract variable before keyword 'food'
-                    # words = string.split(" ")
-                    keywords = ['food', 'kind']
-                    for keyword in keywords:
-                        if keyword in words:
-                            miss_word = ''
-
-                            for indx in range(0, len(words)):
-                                if words[indx] == keyword:
-                                    miss_word = words[indx - 1]
-
-                            if miss_word == 'any' or miss_word == 'world':
-                                pref['food'] = 'any'
-                            else:
-                                pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
-
-                if pref['area'] == '':
-                    # Only use words in sentences that contain in (like in the center, ...)
-                    keywords = ['in', 'area']
-                    for keyword in keywords:
-                        if keyword in words:
-                            miss_word = ''
-
-                            for indx in range(0, len(words)):
-                                if words[indx] == keyword:
-                                    if words[indx + 1] == 'the':
-                                        miss_word = words[indx + 2]
-                            # TODO find alternatives for any
-                            if 'any' in words:
-                                pref['area'] = 'any'
-                            else:
-                                pref['area'] = self.get_levenshtein_items([miss_word], self.areas)
-
-                if pref['pricerange'] == '':
-                    # TODO find keywords
-                    keywords = ['price', 'restaurant', 'priced']
-                    for keyword in keywords:
-                        if keyword in words:
-                            if 'any' == words[words.index(keyword) - 1]:
-                                pref['pricerange'] = 'any'
-                            else:
-                                pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
-        '''
-        return pref
-
-    def get_levenshtein_items(self, miss_words, possible_words):
-        # Check for matching with Levenshtein distance
-        # more than distance 3 it will fail
-        # remove all stopwords to not get a close distance to words like 'the'
-        stop_words = set(stopwords.words('english'))
-        miss_words = [w for w in miss_words if w not in stop_words]
-
-        dst = {
-            '1': [],
-            '2': [],
-            '3': []
-        }
-        for miss_word in miss_words:
-            # let's check if every misspelled word before food can be similar to something in the dataset
-            for word in possible_words:
-                if lev.distance(word, miss_word) <= 3:
-                    dst[str(lev.distance(word, miss_word))].append(word)
-        pref = []
-        # finally let's set the preference giving priority to the one with less distance
-        if len(dst['1']) >= 1:
-            pref = dst['1'][0]
-        else:
-            if len(dst['2']) >= 1:
-                pref = dst['2'][0]
-            else:
-                if len(dst['3']) >= 1:
-                    pref = dst['3'][0]
-                else:
-                    return ''
-                    # TODO set state to request more info (set string saying name is not recognized)
-        return pref
+    def extract_correct_spelling(self, distances):
+        # finally let's set the food preference giving priority to the one with less distance
+        for missing_pref in distances.keys():
+            dst = distances[missing_pref]
+            if len(dst) and len(dst['1']):
+                for entry, miss_word in dst['1']:
+                    return entry, miss_word, missing_pref
+            elif len(dst) and len(dst['2']):
+                for entry, miss_word in dst['2']:
+                    return entry, miss_word, missing_pref
+            elif len(dst) and len(dst['3']):
+                for entry, miss_word in dst['3']:
+                    return entry, miss_word, missing_pref
+        return '', 'your word', ''
 
     def lookup_in_restaurant_info(self, preferences):
         if preferences.loc[0]['food'] != 'any':

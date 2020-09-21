@@ -13,8 +13,9 @@ class StateManager:
         s4 = StateNode(State.S4)
         s5 = StateNode(State.S5)
         s6 = StateNode(State.S6)
+        s7 = StateNode(State.S7)
 
-        self.__states = [s1, s2, s3, s4, s5, s6]
+        self.__states = [s1, s2, s3, s4, s5, s6, s7]
 
         e12 = Edge(s2, ['inform', 'reqalts', 'negate', 'deny', 'reqmore'])
         e11 = Edge(s1, ['confirm', 'affirm', 'request', 'null', 'hello', 'repeat', 'ack', 'restart', 'thankyou'])
@@ -65,6 +66,16 @@ class StateManager:
         s6.addEdge(e61)
         s6.addEdge(e65)
 
+        # extra Node just for processing yes/no questions for misspellings
+        e73 = Edge(s2, ['affirm', 'ack', 'reqalts', 'inform', 'negate', 'deny'])
+        e76 = Edge(s7, ['confirm', 'request', 'repeat', 'null', 'reqmore', 'thankyou'])
+        e71 = Edge(s1, ['restart', 'hello'])
+        e75 = Edge(s5, ['bye'])
+        s7.addEdge(e73)
+        s7.addEdge(e76)
+        s7.addEdge(e71)
+        s7.addEdge(e75)
+
     def processState(self, state, utterance, preferences):
         # All the possibilities should be here, based on the utterance,
         # the function will return the next state
@@ -89,7 +100,8 @@ class State(Enum):
     S3 = 3,
     S4 = 4,
     S5 = 5,
-    S6 = 6
+    S6 = 6,
+    S7 = 7
 
 
 class StateNode:
