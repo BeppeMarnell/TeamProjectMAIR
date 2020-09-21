@@ -28,10 +28,10 @@ class Models:
 
         # TODO: here you can activate and deactivate the models
         self.models = {
-            'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
+            # 'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
             # 'decTree': DecisionTreeClassifier(),
             # 'SVM': SVC(gamma='scale', probability=True, C=1),
-            # 'multiNB': MultinomialNB(),
+            'multiNB': MultinomialNB(),
             # 'kNeigh': KNeighborsClassifier(n_neighbors=3)
         }
 
