@@ -40,7 +40,7 @@ class Models:
         # TODO: Here you can activate if you'd like one or multiple models at the same time
         # TODO: From task 1.b on, it is not possible to have multiple models
         self.singleModel = True
-        self.singleModelName = 'logReg'  # Default one
+        self.singleModelName = 'multiNB'  # Default one
 
         self.baseline1 = baseline1
         self.baseline2 = baseline2
