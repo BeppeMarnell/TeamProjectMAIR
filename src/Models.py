@@ -166,76 +166,102 @@ class Models:
 
         # TODO keywords matching here
 
+        track_replaced = []
+
         for missing_pref in ['food', 'area', 'pricerange']:
 
             if pref[missing_pref] == '':
-                # TODO: p: expand this
-                keywords = {'food': ['food'], 'area': ['in', 'the'], 'pricerange': ['priced']}
+                keywords = {'food': [['food'], ['restaurant']], 'area': [['in', 'the'], ['area']],
+                            'pricerange': [['priced'], ['restaurant'], ['price'], ['pricerange']]}
                 keyword_selection = {'food': self.foods, 'area': self.areas, 'pricerange': self.price_ranges}
 
                 # Extract variable before relevant keyword
                 words = string.split(" ")
 
-                # TODO: Add more rigorous any preference detection
-                if set(keywords[missing_pref]).issubset(set(words)):
-                    miss_word = ''
-                    if missing_pref != 'area':
-                        for indx in range(0, len(words)):
-                            if words[indx] == keywords[missing_pref][0]:
-                                miss_word = words[indx - 1]
-                    else:
-                        for indx in range(0, len(words)):
-                            if indx != 0 and [words[indx-1], words[indx]] == keywords[missing_pref]:
-                                miss_word = words[indx + 1]
+                for poss_keyword in keywords[missing_pref]:
+                    if set(poss_keyword).issubset(set(words)):
+                        miss_word = ''
+                        if missing_pref != 'area':
+                            for indx in range(0, len(words)):
+                                # if the keyword matches a word in the sentence and doesn't occur
+                                # in the set of keywords, it's a match
+                                if words[indx] == poss_keyword[0]:
+                                    if not any([words[indx - 1]] in sublist for sublist in keywords.values()):
+                                        miss_word = words[indx - 1]
+                        else:
+                            for indx in range(0, len(words)):
+                                # for matching 'in' 'the'
+                                if indx != 0 and [words[indx-1], words[indx]] == keywords[missing_pref][0]:
+                                    if not any([words[indx + 1]] in sublist for sublist in keywords.values()):
+                                        miss_word = words[indx + 1]
+                                # for matching the other keywords
+                                elif words[indx] == keywords[missing_pref][1][0]:
+                                    if not any([words[indx - 1]] in sublist for sublist in keywords.values()):
+                                        miss_word = words[indx - 1]
 
-                    if miss_word == 'any':
-                        pref[missing_pref] = 'any'
-                        break
-                    # Check for matching with Levenshtein distance
-                    # more than distance 3 it will fail
-                    dst = {
-                        '1': [],
-                        '2': [],
-                        '3': []
-                    }
+                        # rudimentary any preference detection
+                        if miss_word == 'any':
+                            pref[missing_pref] = 'any'
+                            break
 
-                    # let's check if every misspelled word before food can be similar to something in the dataset
-                    for stuff in keyword_selection[missing_pref]:
-                        if lev.distance(stuff, miss_word) <= 3:
-                            #print(lev.distance(food, miss_word), lev.distance('Levenshtein', 'food'), food, miss_word)
-                            dst[str(lev.distance(stuff, miss_word))].append(stuff)
+                        # possible matches should be at least three characters
+                        if len(miss_word) < 3:
+                            break
 
-                    # finally let's set the food preference giving priority to the one with less distance
-                    change_check = 0
-                    if len(dst['1']):
-                        for entry in dst['1']:
-                            utterance = self.__patternMatchingRequest(miss_word, entry)
-                            if utterance == 'affirm':
-                                pref[missing_pref] = entry
-                                change_check = 1
-                                break
+                        # since food and pricerange share the 'restaurant' keyword, check if matching preference
+                        # not overlap
+                        if missing_pref != 'food' and (pref['food'] == miss_word or miss_word in track_replaced):
+                            break
 
-                    elif len(dst['2']):
-                        for entry in dst['2']:
-                            utterance = self.__patternMatchingRequest(miss_word, entry)
-                            if utterance == 'affirm':
-                                pref[missing_pref] = entry
-                                change_check = 1
-                                break
+                        if missing_pref != 'pricerange' and \
+                                (pref['pricerange'] == miss_word or miss_word in track_replaced):
+                            break
 
-                    elif len(dst['3']):
-                        for entry in dst['3']:
-                            utterance = self.__patternMatchingRequest(miss_word, entry)
-                            if utterance == 'affirm':
-                                change_check = 1
-                                pref[missing_pref] = entry
-                                break
+                        # Check for matching with Levenshtein distance
+                        # more than distance 3 it will fail
+                        dst = {
+                            '1': [],
+                            '2': [],
+                            '3': []
+                        }
 
-                    # Add something to say that in case the word does not exist the user need to specify it
-                    # P: something like this?
-                    if not change_check:
-                        print("-----> Either", miss_word, "does not occur in my database or something else went wrong.")
-                        print("-----> I apologize for the inconvenience. Please try something else.")
+                        # let's check if every misspelled word before the keyword
+                        # can be similar to something in the dataset
+                        for stuff in keyword_selection[missing_pref]:
+                            if lev.distance(stuff, miss_word) <= 3:
+                                dst[str(lev.distance(stuff, miss_word))].append(stuff)
+
+                        # finally let's set the preference giving priority to the one with less distance
+                        change_check = 0
+                        if len(dst['1']):
+                            for entry in dst['1']:
+                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                if utterance == 'affirm':
+                                    pref[missing_pref] = entry
+                                    change_check = 1
+                                    break
+
+                        elif len(dst['2']):
+                            for entry in dst['2']:
+                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                if utterance == 'affirm':
+                                    pref[missing_pref] = entry
+                                    change_check = 1
+                                    break
+
+                        elif len(dst['3']):
+                            for entry in dst['3']:
+                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                if utterance == 'affirm':
+                                    change_check = 1
+                                    pref[missing_pref] = entry
+                                    break
+
+                        # Add something to say that in case the word does not exist the user need to specify it
+                        if not change_check:
+                            print("-----> Either", miss_word,
+                                  "does not occur in my database or something else went wrong.")
+                            print("-----> I apologize for the inconvenience. Please try something else.")
         '''
                 words = string.split(" ")
                 if pref['food'] == '':
