@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import train_test_split
+import random
 
 
 class DatasetLoader:
@@ -14,6 +15,14 @@ class DatasetLoader:
         self.restaurant_info_df = pd.read_csv("assets/restaurant_info.csv")
         # Some features were empty, let's replace them with 'unknown'
         self.restaurant_info_df = self.restaurant_info_df.replace(np.nan, 'unknown', regex=True)
+
+        # add food quality to database
+        quality = []
+        qualities = ['good', 'moderate', 'bad']
+        for i, row in enumerate(self.restaurant_info_df.values):
+            r = random.randint(0, 2)
+            quality.append(qualities[r])
+        self.restaurant_info_df['foodquality'] = quality
 
         # Clean the dataset
         self.__clean(baseline2)
