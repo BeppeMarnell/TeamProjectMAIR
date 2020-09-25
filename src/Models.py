@@ -26,6 +26,14 @@ class Models:
         self.recommendation = None
         self.index = -1
 
+        self.further_pref = {
+            'busy': '',
+            'good food': '',
+            'long time': '',
+            'children': '',
+            'romantic': ''
+        }
+
         # TODO: here you can activate and deactivate the models
         self.models = {
             # 'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
@@ -369,12 +377,14 @@ class Models:
             area = self.dataset.restaurant_info_df['area'] == preferences.loc[0]['area']
         else:
             area = True
-        if preferences.loc[0]['pricerange'] != 'any':
-            pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
-        else:
+        if preferences.loc[0]['pricerange'] == 'any' or preferences.loc[0]['pricerange'] == '':
             pricerange = True
+        else:
+            pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
 
+        #print("Price", pricerange)
         restaurants = self.dataset.restaurant_info_df.loc[food & area & pricerange]
+        #print("Restaurants",restaurants)
         self.restaurants = restaurants.reset_index()
 
     def recommend_restaurant(self):
@@ -392,6 +402,7 @@ class Models:
     def recommend(self, preferences):
         self.index += 1
         if not set(self.restaurants):
+            #print(preferences['pricerange'])
             self.lookup_in_restaurant_info(preferences)
         self.recommendation = self.recommend_restaurant()
 
@@ -413,3 +424,23 @@ class Models:
                     requested.append((details.get(element)[0], self.recommendation[element]))
                     break
         return requested
+
+    def implication_rules(self, further_pref):
+        restaurants = self.restaurants
+        # TODO do iterations
+        # TODO fix same consequent for different rules (using just and is not possible)
+        #   need iterations and use lower level?
+        print(restaurants['foodquality'])
+
+        for column in further_pref:
+            # Select column contents by column name using [] operator
+            columnSeriesObj = further_pref[column]
+
+            print('Colunm Name : ', column)
+            print('Column Contents : ', columnSeriesObj.values)
+            if columnSeriesObj.values[0]:
+                print(True)
+                # while self.further_pref[column] == '':
+                # self.rules(restaurants)
+        print(restaurants)
+        # return restaurants
