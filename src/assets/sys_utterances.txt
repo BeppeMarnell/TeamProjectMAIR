@@ -15,8 +15,6 @@ confirmfalserest -----> No, the preference_name of restaurant_name is preference
 implicationunknown -----> I'm sorry, I don't know if the restaurant is preference_name.
 affirm -----> You chose restaurant_name. What details would you like to know?
 misunderstanding -----> Sorry, I could not understand what you said, please repeat it.
-answerquestion -----> Please answer the question.
-apology -----> I apologize for the inconvenience. Please try something else.
 restart -----> Restarting from the beginning.
 bye -----> Thank you for using the MAIRDISY (MAIR DIalog SYstem). Good bye!
 

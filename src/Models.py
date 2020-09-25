@@ -25,8 +25,6 @@ class Models:
         self.restaurants = pd.DataFrame()
         self.recommendation = None
         self.index = -1
-        # index if system recommends a category (how about vietnamese food?)
-        self.index_category = 0
 
         self.further_pref = {
             'busy': '',
@@ -407,56 +405,6 @@ class Models:
             #print(preferences['pricerange'])
             self.lookup_in_restaurant_info(preferences)
         self.recommendation = self.recommend_restaurant()
-
-    def propose_alternative_type(self, preferences):
-        """
-        Method to propose changes to the user preference in order to actually find a restaurant.
-        Only executed, if user used preferences which lead to no found restaurant.
-        Will adapt one of the preferences and check if there are possible restaurants found then.
-        First changes type of food, then area, then price
-        :param preferences: Preferences entered by user
-        :return: List of tuples with possible changes to one of the preferences
-        """
-        # check if any of the preferences is already set to any (don't need to check then)
-        food_any = preferences.loc[0]['food'] == 'any'
-        area_any = preferences.loc[0]['area'] == 'any'
-        price_any = preferences.loc[0]['pricerange'] == 'any'
-        possible_options = []
-
-        if not food_any:
-            # modify the specific preference to any and look up possible restaurants
-            preferences_new = preferences.copy(deep=True)
-            preferences_new.loc[0]['food'] = 'any'
-            possible_restaurants = self.lookup_in_restaurant_info(preferences_new)
-            # get a list of unique values for that category
-            possible_food = possible_restaurants['food'].unique()
-            for item in possible_food:
-                possible_options.append((item, 'food'))
-        if not area_any:
-            preferences_new = preferences.copy(deep=True)
-            preferences_new.loc[0]['area'] = 'any'
-            possible_restaurants = self.lookup_in_restaurant_info(preferences_new)
-            possible_areas = possible_restaurants['area'].unique()
-            for item in possible_areas:
-                possible_options.append((item, 'area'))
-        if not price_any:
-            preferences_new = preferences.copy(deep=True)
-            preferences_new.loc[0]['pricerange'] = 'any'
-            possible_restaurants = self.lookup_in_restaurant_info(preferences_new)
-            possible_prices = possible_restaurants['pricerange'].unique()
-            for item in possible_prices:
-                possible_options.append((item, 'pricerange'))
-        return possible_options
-
-    def choose_proposal(self, possible_options):
-        """
-        Method that lets you choose one element of the possible options. It returns a new one each time,
-        when it has returned all, it starts from the beginning again
-        :param possible_options: List of possible preference changes that will allow you to find a restaurant
-        :return: one possible change to either food type, price or area. Returns tuple with new value and type
-        """
-        self.index_category += 1
-        return possible_options[self.index_category % len(possible_options)]
 
     def extract_details(self, string):
         string = string.lower()

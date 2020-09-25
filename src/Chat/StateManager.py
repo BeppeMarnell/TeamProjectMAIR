@@ -12,10 +12,8 @@ class StateManager:
         s3 = StateNode(State.S3)
         s4 = StateNode(State.S4)
         s5 = StateNode(State.S5)
-        s6 = StateNode(State.S6)
-        s7 = StateNode(State.S7)
 
-        self.__states = [s1, s2, s3, s4, s5, s6, s7]
+        self.__states = [s1, s2, s3, s4, s5]
 
         e12 = Edge(s2, ['inform', 'reqalts', 'negate', 'deny', 'reqmore'])
         e11 = Edge(s1, ['confirm', 'affirm', 'request', 'null', 'hello', 'repeat', 'ack', 'restart', 'thankyou'])
@@ -36,6 +34,10 @@ class StateManager:
         s2.addEdge(e23)
         s2.addEdge(e25)
 
+        # if yes moves to state 5, then you cannot say yes, then ask for more infos.
+        # Need state 6 as final state, only if you say goodbye or thank you
+        # State 5: restaurant is pretty safe, (has been ack or more details have been requested)
+        #  if alternative is asked, switch to S4
         e31 = Edge(s1, ['restart', 'hello'])
         e32 = Edge(s2, ['inform', 'deny'])
         e33 = Edge(s3, ['confirm', 'repeat', 'negate', 'reqmore', 'reqalts', 'thankyou'])
@@ -55,26 +57,6 @@ class StateManager:
         s4.addEdge(e44)
         s4.addEdge(e41)
         s4.addEdge(e45)
-
-        # extra Node just for processing yes/no questions
-        e63 = Edge(s3, ['affirm', 'ack', 'reqalts', 'inform'])
-        e66 = Edge(s6, ['negate', 'confirm', 'request', 'repeat', 'null', 'deny', 'reqmore', 'thankyou'])
-        e61 = Edge(s1, ['restart', 'hello'])
-        e65 = Edge(s5, ['bye'])
-        s6.addEdge(e63)
-        s6.addEdge(e66)
-        s6.addEdge(e61)
-        s6.addEdge(e65)
-
-        # extra Node just for processing yes/no questions for misspellings
-        e73 = Edge(s2, ['affirm', 'ack', 'reqalts', 'inform', 'negate', 'deny'])
-        e76 = Edge(s7, ['confirm', 'request', 'repeat', 'null', 'reqmore', 'thankyou'])
-        e71 = Edge(s1, ['restart', 'hello'])
-        e75 = Edge(s5, ['bye'])
-        s7.addEdge(e73)
-        s7.addEdge(e76)
-        s7.addEdge(e71)
-        s7.addEdge(e75)
 
     def processState(self, state, utterance, preferences):
         # All the possibilities should be here, based on the utterance,
@@ -100,8 +82,6 @@ class State(Enum):
     S3 = 3,
     S4 = 4,
     S5 = 5,
-    S6 = 6,
-    S7 = 7
 
 
 class StateNode:

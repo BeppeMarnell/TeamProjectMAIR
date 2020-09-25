@@ -29,20 +29,6 @@ class ChatManager:
 
         self.print_text = ""
 
-        self.distances = {}
-        self.distance_suggestion = False
-        self.entry = ''
-        self.missing_pref = ''
-        self.miss_word = ''
-
-        # extra values, used when system suggests new category
-        self.new_preferences_df = pd.DataFrame(pref, index=[0])
-        self.recommended_category = ''
-        self.new_type = ''
-        self.possible_options = []
-        self.negative_utterances = ['negate', 'deny']
-        self.positive_utterances = ['affirm', 'ack']
-
         with open('assets/sys_utterances.txt', 'r') as inf:
             for line in inf:
                 line = line.replace('\n', '')
@@ -72,7 +58,6 @@ class ChatManager:
             if self.state == State.S5:
                 break
 
-            self.distance_suggestion = False
             # Ask user for input
             user_input = input('-----> ')
 
@@ -83,14 +68,9 @@ class ChatManager:
 
             new_state = self.__state_manager.processState(self.state, utterance, self.pref_df)
 
-            if self.distance_suggestion:
-                new_state = State.S7
-                self.entry, self.miss_word, self.missing_pref = self.models.extract_correct_spelling(self.distances)
-
             # if new state is S3, look up possible restaurants, that will be recommended in self.SystemStateUtterance()
-            # ensure that current state is either not S3 or the utterance asks for another result
+            # ensure that current state is either S3 or the utterance asks for another result
             # otherwise, it would recommend a different restaurant even though the user just asked for confirmation
-
             if new_state == State.S2 and self.state == State.S3 and utterance == 'deny' and user_input == 'wrong':
                 print('-----> We will restart because it is wrong')
             
@@ -101,6 +81,7 @@ class ChatManager:
             if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'):
                 self.models.recommend(self.pref_df)
                 print(self.models.restaurants)
+
 
             print('')
             print('utterance: ')
@@ -127,11 +108,6 @@ class ChatManager:
             print(self.print_text)
             return
 
-        if self.state == State.S2 and food and area and price:
-            # manually set state as that should be the correct state.
-            self.state = State.S3
-            self.models.recommend(self.pref_df)
-
         if self.state == State.S2 and not food:
             self.print_text = self.sys_utter['askfood']
             print(self.print_text)
@@ -150,6 +126,7 @@ class ChatManager:
         if self.state == State.S3:
             if len(self.models.recommendation) == 0:
                 self.print_text = self.sys_utter['noresults']
+
             elif len(self.models.recommendation) == 1 and self.models.recommendation[0] == -1:
                 self.print_text = self.sys_utter['nomoreresults']
             else:
@@ -174,19 +151,6 @@ class ChatManager:
             print(self.print_text)
             return
 
-        if self.state == State.S6:
-            self.print_text = self.sys_utter['proposenewtype'].replace('new_value', self.recommended_category) \
-                .replace('new_type', self.new_type)
-            print(self.print_text)
-
-        if self.state == State.S7:
-            if self.entry != '':
-                self.print_text = self.sys_utter['recognizeword'].replace('miss_word', self.miss_word)\
-                    .replace('entry', self.entry)
-            else:
-                self.print_text = self.sys_utter['recognizewordfalse'].replace('miss_word', self.miss_word)
-            print(self.print_text)
-
     def react_to_utterance(self, utterance, user_input):
         if utterance == 'ack':
             # same as affirm
@@ -202,28 +166,7 @@ class ChatManager:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
                                                                    self.models.recommendation['restaurantname'])
                 print(self.print_text)
-
-            if self.state == State.S4:
-                # user is prompted with question to show more details.
-                # If yes is chosen, the user gets every info about the place
-                if len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
-                    details = ["restaurantname", "pricerange", "area", "food", "phone", "addr", "postcode"]
-                    for element in details:
-                        self.print_text = self.sys_utter['details'].replace('detail_type', element) \
-                            .replace('detail_info', self.models.recommendation[element])
-                        print(self.print_text)
-
-            if self.state == State.S6:
-                # update list of recommendations if user agrees to suggestion from system
-                self.pref_df.at[0, self.new_type] = self.recommended_category
-                self.models.restaurants = []
-                self.models.index = -1
-
-            if self.state == State.S7:
-                self.pref_df.at[0, self.missing_pref] = self.entry
-                self.models.restaurants = []
-                self.models.index = -1
-            return
+                return
 
         if utterance == 'bye':
             # don't need to do anything as it will automatically move to state S5 and print goodbye message
@@ -269,13 +212,13 @@ class ChatManager:
 
             if food:
                 if food_correct:
-                    text = self.sys_utter[confirmtrue].replace('preference_name', 'type') \
+                    text = self.sys_utter[confirmtrue].replace('preference_name', 'type')\
                         .replace('preference_value', food_pref)
                 elif food_given:
-                    text = self.sys_utter[confirmfalse].replace('preference_name', 'type') \
+                    text = self.sys_utter[confirmfalse].replace('preference_name', 'type')\
                         .replace('preference_value', food_pref)
                 else:
-                    text = self.sys_utter[confirmfalse].replace('preference_name', 'type of restaurant') \
+                    text = self.sys_utter[confirmfalse].replace('preference_name', 'type of restaurant')\
                         .replace('preference_value', 'not specified')
                 if recommend:
                     text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])
@@ -283,13 +226,13 @@ class ChatManager:
 
             if area:
                 if area_correct:
-                    text = self.sys_utter[confirmtrue].replace('preference_name', 'area') \
+                    text = self.sys_utter[confirmtrue].replace('preference_name', 'area')\
                         .replace('preference_value', area_pref)
                 elif area_given:
-                    text = self.sys_utter[confirmfalse].replace('preference_name', 'area') \
+                    text = self.sys_utter[confirmfalse].replace('preference_name', 'area')\
                         .replace('preference_value', area_pref)
                 else:
-                    text = self.sys_utter[confirmfalse].replace('preference_name', 'area') \
+                    text = self.sys_utter[confirmfalse].replace('preference_name', 'area')\
                         .replace('preference_value', 'not specified')
                 if recommend:
                     text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])
@@ -297,13 +240,13 @@ class ChatManager:
 
             if price:
                 if price_correct:
-                    text = self.sys_utter[confirmtrue].replace('preference_name', 'price') \
+                    text = self.sys_utter[confirmtrue].replace('preference_name', 'price')\
                         .replace('preference_value', price_pref)
                 elif price_given:
-                    text = self.sys_utter[confirmfalse].replace('preference_name', 'price') \
+                    text = self.sys_utter[confirmfalse].replace('preference_name', 'price')\
                         .replace('preference_value', price_pref)
                 else:
-                    text = self.sys_utter[confirmfalse].replace('preference_name', 'price') \
+                    text = self.sys_utter[confirmfalse].replace('preference_name', 'price')\
                         .replace('preference_value', 'not specified')
                 if recommend:
                     text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])
@@ -344,10 +287,7 @@ class ChatManager:
             # Update preferences and state
             self.update_preferences(user_input)
 
-            if self.state == State.S7:
-                self.print_text = self.sys_utter['recognizewordfalse'].replace('miss_word', self.miss_word) \
-                                  + "\n" + self.sys_utter['apology']
-                print(self.print_text)
+            # TODO add possibility to choose "not korean food" or "not in the center"
             # new_preferences = self.models.negative_preferences(user_input)
             return
 
@@ -385,11 +325,6 @@ class ChatManager:
 
         if utterance == 'thankyou':
             # don't need to do anything, as it will automatically move to final state and print bye utterance
-            return
-
-        if self.state == State.S7 or self.state == State.S6:
-            self.print_text = self.sys_utter['answerquestion']
-            print(self.print_text)
             return
 
         self.print_text = self.sys_utter['misunderstanding']
