@@ -432,18 +432,19 @@ class Models:
         return pref
 
     def lookup_in_restaurant_info(self, preferences):
-        if preferences.loc[0]['food'] != 'any':
-            food = self.dataset.restaurant_info_df['food'] == preferences.loc[0]['food']
+        # Preference is true if it is not filled, so restaurants can already be looked up 
+        if preferences.loc[0]['food'] == 'any' or preferences.loc[0]['food'] == '':
+            food = True 
         else:
-            food = True
-        if preferences.loc[0]['area'] != 'any':
-            area = self.dataset.restaurant_info_df['area'] == preferences.loc[0]['area']
+           food = self.dataset.restaurant_info_df['food'] == preferences.loc[0]['food']
+        if preferences.loc[0]['area'] == 'any' or preferences.loc[0]['area'] == '':
+            area = True 
         else:
-            area = True
-        if preferences.loc[0]['pricerange'] != 'any':
-            pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
+           area = self.dataset.restaurant_info_df['area'] == preferences.loc[0]['area']
+        if preferences.loc[0]['pricerange'] == 'any' or preferences.loc[0]['pricerange'] == '':
+            pricerange = True 
         else:
-            pricerange = True
+           pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
 
         restaurants = self.dataset.restaurant_info_df.loc[food & area & pricerange]
         self.restaurants = restaurants.reset_index()

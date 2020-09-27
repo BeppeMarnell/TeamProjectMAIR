@@ -17,4 +17,5 @@ misunderstanding -----> Sorry, I could not understand what you said, please repe
 restart -----> Restarting from the beginning.
 deny -----> I am sorry, what are your correct restaurant preferences?
 bye -----> Thank you for using the MAIRDISY (MAIR DIalog SYstem). Good bye!
+alternatives -----> Alternative option: restaurant restaurant_name is serving food_name food in area_name part of town for price_range price.
 

@@ -39,7 +39,6 @@ class ChatManager:
         index = 0
         while True:
 
-            # Check system state and preferences
             self.SystemStateUtterance()
 
             if self.state == State.S1:
@@ -50,13 +49,15 @@ class ChatManager:
                     'food': ''
                 }
                 self.pref_df = pd.DataFrame(pref, index=[0])
-
+            
             # S5 is the end state, therefore terminate the program
             if self.state == State.S5:
                 break
 
             # Ask user for input
             user_input = input('-----> ')
+
+            #check restaurant recommendation 
 
             # Evaluate inputted utterance and check the next state
             utterance = self.models.evalueNewUtterance(user_input)
@@ -75,7 +76,6 @@ class ChatManager:
             
             elif new_state == State.S2 and self.state == State.S3 and utterance == 'deny':
                 print('-----> Okay then we will take that into account')
-                #print(self.pref_df)
 
             if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'):
                 self.models.recommend(self.pref_df)
@@ -95,30 +95,62 @@ class ChatManager:
             return
 
         if self.state == State.S2 and not food:
-            self.print_text = self.sys_utter['askfood']
-            print(self.print_text)
-            return
+
+            self.models.lookup_in_restaurant_info(self.pref_df)
+
+            # If there are 0 or 1 restaurants for the preferences, go to state 3
+            if len(self.models.restaurants) <= 1:
+                self.state = State.S3
+                self.models.recommend(self.pref_df)
+            
+            else:
+                self.print_text = self.sys_utter['askfood']
+                print(self.print_text)
+                return
 
         if self.state == State.S2 and not area:
-            self.print_text = self.sys_utter['askarea']
-            print(self.print_text)
-            return
+
+            self.models.lookup_in_restaurant_info(self.pref_df)
+
+            # If there are 0 or 1 restaurants for the preferences, go to state 3
+            if len(self.models.restaurants) <= 1:
+                self.state = State.S3
+                self.models.recommend(self.pref_df)
+            
+            else: 
+                self.print_text = self.sys_utter['askarea']
+                print(self.print_text)
+                return
 
         if self.state == State.S2 and not price:
-            self.print_text = self.sys_utter['askprice']
-            print(self.print_text)
-            return
 
+            self.models.lookup_in_restaurant_info(self.pref_df)
+
+            # If there are 0 or 1 restaurants for the preferences, go to state 3
+            if len(self.models.restaurants) <= 1:
+                self.state = State.S3
+                self.models.recommend(self.pref_df)
+
+
+            # If the length of the restaurant recommendations is >1, continue normally 
+            else:
+                self.print_text = self.sys_utter['askprice']
+                print(self.print_text)
+                return
+
+        # Recommend until the recommendationlist is empty
         if self.state == State.S3:
             if len(self.models.recommendation) == 0:
-                self.print_text = self.sys_utter['noresults']
-
+                # Suggest alternative options if there are no options
+                self.Suggest_Res(self.pref_df)
+                
             elif len(self.models.recommendation) == 1 and self.models.recommendation[0] == -1:
                 self.print_text = self.sys_utter['nomoreresults']
+                print(self.print_text)
             else:
                 self.print_text = self.sys_utter['suggestrest'].replace('restaurant_name',
                                                                         self.models.recommendation['restaurantname'])
-            print(self.print_text)
+                print(self.print_text)
             return
 
         if self.state == State.S5:
@@ -227,12 +259,9 @@ class ChatManager:
             return
 
         if utterance == 'deny':
-        # Wrong
-        # I dont want 
             user_input_split = user_input.split()
             for i in user_input_split: 
                 if i == 'dont':
-                    #print('succes')
                     for preferences in ['food', 'area', 'pricerange']:
                         if self.pref_df[preferences].tolist()[0] in user_input:
                             self.pref_df[preferences] = ''
@@ -241,7 +270,6 @@ class ChatManager:
 
                 if i == 'wrong':
                     for preferences in ['food', 'area', 'pricerange']:
-                        #if self.pref_df[preferences].tolist()[0] in user_input:
                         self.pref_df[preferences] = ''
                         self.models.restaurants = []
                         return 
@@ -347,4 +375,36 @@ class ChatManager:
         self.print_text = self.sys_utter['misunderstanding']
         print(self.print_text)
         return
+
+    # Function to suggest alternatives 
+    def Suggest_Res(self, preferences):
+
+        # If a preference is filled, choose one preference to suggest alternatives. Set to other two at 'any'. 
+        if preferences.loc[0]['food'] != 'any' or preferences.loc[0]['food'] != '':
+            self.pref_df['area'] = 'any'
+            self.pref_df['pricerange'] = 'any'
+            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.recommend(self.pref_df)
+
+        elif preferences.loc[0]['area'] != 'any' or preferences.loc[0]['area'] != '':
+            self.pref_df['food'] = 'any'
+            self.pref_df['pricerange'] = 'any'
+            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.recommend(self.pref_df)
+        
+        elif preferences.loc[0]['pricerange'] != 'any' or preferences.loc[0]['pricerange'] != '':
+            self.pref_df['area'] = 'any'
+            self.pref_df['food'] = 'any'
+            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.recommend(self.pref_df)
+
+        # Suggest start over or the alternative 
+        print('-----> There are no results for your preferences. You can type start over or look at the following alternative')
+
+        alt_1 = self.sys_utter['alternatives'].replace('restaurant_name', self.models.recommendation['restaurantname'])\
+                        .replace('food_name', self.models.recommendation['food']).replace('area_name', self.models.recommendation['area']).replace('price_range', self.models.recommendation['pricerange'])
+        
+        #self.models.recommend(self.pref_df)
+        print(alt_1)
+        print('-----> If you would like more alternatives, request more options. Otherwise, confirm the alternative please!')
 
