@@ -16,4 +16,8 @@ affirm -----> You chose restaurant_name. What details would you like to know?
 misunderstanding -----> Sorry, I could not understand what you said, please repeat it.
 restart -----> Restarting from the beginning.
 bye -----> Thank you for using the MAIRDISY (MAIR DIalog SYstem). Good bye!
-
+clarify -----> I did not recognize miss_word . Did you mean: entry ?
+repeat_ask -----> Please answer the question.
+word_not_exist -----> Either miss_word does not occur in my database or something else went wrong.
+apologize -----> I apologize for the inconvenience. Please try something else.
+loading -----> loading, please wait...

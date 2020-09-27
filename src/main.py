@@ -2,11 +2,13 @@ from src.Chat.ChatManager import ChatManager
 from src.DatasetLoader import DatasetLoader
 from src.Models import Models
 import time
+import sys
+import argparse
 
 
 class Main:
 
-    def __init__(self):
+    def __init__(self, formal, delay, caps):
         # Load the dataset
         data = DatasetLoader()
 
@@ -20,9 +22,16 @@ class Main:
             time.sleep(1)
 
         # Initialize the chat and run the dialogs
-        chat = ChatManager(modelz)
+        chat = ChatManager(modelz, formal, delay, caps)
         chat.run()
 
 
 if __name__ == '__main__':
-    Main()
+    p = argparse.ArgumentParser()
+    p.add_argument("--formal", help="formal or informal system speach. Use informal for informal "
+                                    "speech.", default="formal")
+    p.add_argument("--delay", help="Use delay for a delay of 2 seconds. Use mess_delay for a delay of 2 seconds "
+                                   "accompanied with a message. Use off for no delay", default="off")
+    p.add_argument("--caps", help="Use caps for system output to be in all caps.", default="no_caps")
+    args = p.parse_args(sys.argv[1:])
+    Main(args.formal, args.delay, args.caps)

@@ -132,7 +132,7 @@ class Models:
 
         print('')
 
-    def extractPreference(self, string):
+    def extractPreference(self, string, sys_utter):
         # Lower the string in input
         string = string.lower()
 
@@ -235,7 +235,7 @@ class Models:
                         change_check = 0
                         if len(dst['1']):
                             for entry in dst['1']:
-                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                utterance = self.__patternMatchingRequest(miss_word, entry, sys_utter)
                                 if utterance == 'affirm':
                                     pref[missing_pref] = entry
                                     change_check = 1
@@ -243,7 +243,7 @@ class Models:
 
                         elif len(dst['2']):
                             for entry in dst['2']:
-                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                utterance = self.__patternMatchingRequest(miss_word, entry, sys_utter)
                                 if utterance == 'affirm':
                                     pref[missing_pref] = entry
                                     change_check = 1
@@ -251,7 +251,7 @@ class Models:
 
                         elif len(dst['3']):
                             for entry in dst['3']:
-                                utterance = self.__patternMatchingRequest(miss_word, entry)
+                                utterance = self.__patternMatchingRequest(miss_word, entry, sys_utter)
                                 if utterance == 'affirm':
                                     change_check = 1
                                     pref[missing_pref] = entry
@@ -259,9 +259,12 @@ class Models:
 
                         # Add something to say that in case the word does not exist the user need to specify it
                         if not change_check:
-                            print("-----> Either", miss_word,
-                                  "does not occur in my database or something else went wrong.")
-                            print("-----> I apologize for the inconvenience. Please try something else.")
+                            print(sys_utter['word_not_exist'].replace('miss_word', miss_word)
+                                  .replace('MISS_WORD', miss_word))
+                            print(sys_utter['apologize'])
+                            # print("-----> Either", miss_word,
+                            #      "does not occur in my database or something else went wrong.")
+                            # print("-----> I apologize for the inconvenience. Please try something else.")
         '''
                 words = string.split(" ")
                 if pref['food'] == '':
@@ -310,18 +313,23 @@ class Models:
         '''
         return pref
 
-    def __patternMatchingRequest(self, miss_word, entry):
+    def __patternMatchingRequest(self, miss_word, entry, sys_utter):
         # If the user writes something that could resemble a word in the dataset,
         # it is asked if the matched word is what the user meant
 
-        print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+        #print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+        print(sys_utter['clarify'].replace('miss_word', miss_word).replace('entry', entry)
+              .replace('MISS_WORD', miss_word).replace('ENTRY', entry))
         user_input = input("-----> ")
         utterance = self.evalueNewUtterance(user_input)
 
         while utterance != 'affirm' and utterance != 'negate':
             if utterance != 'repeat':
-                print("-----> Please answer the question.")
-            print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+                #print("-----> Please answer the question.")
+                print(sys_utter['repeat_ask'])
+            #print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
+            print(sys_utter['clarify'].replace('miss_word', miss_word).replace('entry', entry)
+                  .replace('MISS_WORD', miss_word).replace('ENTRY', entry))
             user_input = input("-----> ")
             utterance = self.evalueNewUtterance(user_input)
             print(utterance)
