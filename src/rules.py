@@ -13,7 +13,7 @@ class Rules:
     Our rules:
     7   [cheap, !centre]        busy        False   1   a cheap restaurant outside the centre is not busy
     8   [expensive]             long time   True    1   you spend a lot of time in an expensive restaurant
-    9   [cheap, international]  fast food   True    1   cheap internationational food is fast food
+    9   [cheap, international]  fast food   True    1   cheap international food is fast food
     10  [steakhouse]            vegetarian  False   1   a steakhouse is not vegetarian
     11  [fast food]             romantic    False   2   fast food is not romantic
     12  [fast food]             children    True    2   children like fast food
@@ -69,7 +69,7 @@ class Rules:
         return self.asked_consequents
 
     def __solve_rule(self, restaurant, consequents):
-        # set antedecents known from the data set
+        # set antecedents known from the data set
         cheap = True if restaurant['pricerange'] == 'cheap' else False
         good = True if restaurant['foodquality'] == 'good' else False
         spanish = True if restaurant['food'] == 'spanish' else False
