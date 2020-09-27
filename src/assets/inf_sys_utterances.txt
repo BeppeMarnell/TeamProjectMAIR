@@ -1,0 +1,24 @@
+welcome -----> Hey, Welcome to the dialog system project, glad to have you
+state1 -----> What kind of sweet restaurant are you looking for?
+askfood -----> Okay, and what kind of delicious food are you looking for?
+askarea -----> Okay, and where in town should this restaurant be?
+askprice -----> Okay, and how expensive should it be?
+suggestrest -----> What about restaurant_name?
+nofoodres -----> Could you specify the type of food?
+noresults -----> I'm sorry, I could find anything that matches what you are looking for. You can try again with different preferences though.
+nomoreresults -----> Sorry, that's all I could find. If you want me to show the first one again just request another.
+details -----> The detail_type is detail_info.
+confirmtrue -----> Yep, the preference_name is preference_value.
+confirmfalse -----> Nope, the preference_name is preference_value.
+confirmtruerest -----> Yep, the preference_name of restaurant_name is preference_value.
+confirmfalserest -----> Nope, the preference_name of restaurant_name is preference_value.
+affirm -----> Great, you chose restaurant_name. What would you like to know about it?
+misunderstanding -----> Sorry, I can't see what you're saying, can you say it again?
+restart -----> Alright, let's start over.
+bye -----> Glad to have helped. See you soon!
+clarify -----> I don't know what you mean with miss_word . Did you actually mean: entry ?
+repeat_ask -----> Please answer the question.
+word_not_exist -----> Either miss_word does not occur in my database or something else went wrong.
+apologize -----> Sorry. Please try something else.
+loading -----> hold up, loading some stuff...
+
