@@ -191,7 +191,8 @@ class Rules:
                 # otherwise update consequents
                 consequents = new_consequents
 
-        self.consequents = new_consequents
+            self.consequents = new_consequents
+
         return self.consequents, self.reason
 
 
@@ -203,8 +204,9 @@ if __name__ == '__main__':
     restaurant = {"restaurantname": "pizza express", "pricerange": "expensive", "area": "centre",
                   "food": "spanish", "phone": "01223 324033", "addr": "", "post": "c.b 2", "foodquality": "good"}
 
-    print(rule.consequents)
+    #print(rule.consequents)
     answer, reason = rule.solve_rule(restaurant)
     print(answer)
     print(reason)
-    print(rule.priorities)
+    # print('ciao \n ciao')
+    #print(rule.priorities)

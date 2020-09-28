@@ -40,19 +40,10 @@ class ChatManager:
 
     def run(self):
         # Start the chat loop
-        index = 0
         while True:
 
             # Check system state and preferences
             self.SystemStateUtterance()
-
-            if self.state == State.S1:
-                # Define preferences
-                pref = {
-                    'pricerange': '',
-                    'area': '',
-                    'food': ''
-                }
 
             # S5 is the end state, therefore terminate the program
             if self.state == State.S5:
@@ -83,16 +74,16 @@ class ChatManager:
                 print(self.models.restaurants)
 
 
-            print('')
-            print('utterance: ')
-            print(utterance)
-            # print(new_preferences)
-            print('preference: ')
-            print(self.pref_df.loc[0])
-            print('current state: ')
-            print(self.state)
-            print('new state: ')
-            print(new_state)
+            # print('')
+            # print('utterance: ')
+            # print(utterance)
+            # # print(new_preferences)
+            # print('preference: ')
+            # print(self.pref_df.loc[0])
+            # print('current state: ')
+            # print(self.state)
+            # print('new state: ')
+            # print(new_state)
 
             self.state = new_state
 
@@ -132,17 +123,22 @@ class ChatManager:
             else:
                 self.print_text = self.sys_utter['suggestrest'].replace('restaurant_name',
                                                                         self.models.recommendation['restaurantname'])
-                # TODO make extra state for this
+
+                # Compute implications
                 consequents, reason = self.rules.solve_rule(self.models.recommendation)
-                for asked in self.rules.asked_consequents:
-                    if self.rules.asked_consequents[asked]:
-                        if consequents[asked] is not None:
-                            print(consequents[asked])
-                            print(reason[asked])
+
+                # Inform about the implications
+                for cons in consequents:
+                    if consequents[cons] is not None:
+                        self.print_text += '\n'
+                        text = 'not '
+                        if consequents[cons]:
+                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons)
                         else:
-                            print(self.sys_utter['implicationunknown'].replace('preference_name', asked))
-                # print("Cons", consequents)
-                # print(reason)
+                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', ''.join([text, cons]))
+
+
+            # "What about ....
             print(self.print_text)
             return
 
@@ -193,6 +189,7 @@ class ChatManager:
 
             # Update preferences and state
             new_preferences = self.models.extractPreference(user_input)
+
             # TODO use further preferences
             further_preferences = self.rules.extract_implications(user_input)
             # check what preference to confirm
