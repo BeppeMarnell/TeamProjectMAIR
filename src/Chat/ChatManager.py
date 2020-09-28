@@ -71,7 +71,7 @@ class ChatManager:
             
             if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'):
                 self.models.recommend(self.pref_df)
-                print(self.models.restaurants)
+                #print(self.models.restaurants)
 
 
             # print('')
@@ -132,8 +132,8 @@ class ChatManager:
                     if consequents[cons] is not None:
                         self.print_text += '\n'
                         text = 'not '
-                        if cons == 'children' and cons == 'long time':
-                            text = 'not for'
+                        if str(cons) == 'children' or str(cons) == 'long time':
+                            text = 'not for '
 
                         if consequents[cons]:
                             self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons)
