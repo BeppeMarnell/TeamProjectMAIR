@@ -65,7 +65,7 @@ class Rules:
             if pref in string:
                 self.asked_consequents[pref] = True
 
-        print(self.asked_consequents)
+        #print(self.asked_consequents)
         return self.asked_consequents
 
     def __solve_rule(self, restaurant, consequents):
@@ -204,9 +204,8 @@ if __name__ == '__main__':
     restaurant = {"restaurantname": "pizza express", "pricerange": "expensive", "area": "centre",
                   "food": "spanish", "phone": "01223 324033", "addr": "", "post": "c.b 2", "foodquality": "good"}
 
-    #print(rule.consequents)
+    print(rule.consequents)
     answer, reason = rule.solve_rule(restaurant)
     print(answer)
     print(reason)
-    # print('ciao \n ciao')
-    #print(rule.priorities)
+    print(rule.priorities)

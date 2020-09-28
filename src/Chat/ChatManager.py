@@ -132,11 +132,13 @@ class ChatManager:
                     if consequents[cons] is not None:
                         self.print_text += '\n'
                         text = 'not '
+                        if cons == 'children' and cons == 'long time':
+                            text = 'not for'
+
                         if consequents[cons]:
                             self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons)
                         else:
                             self.print_text += self.sys_utter['askforimplication'].replace('qualities', ''.join([text, cons]))
-
 
             # "What about ....
             print(self.print_text)
@@ -345,4 +347,4 @@ class ChatManager:
             self.models.restaurants = []
 
         # self.rules.further_pref_df.at[0] = further_preferences
-        print(further_preferences)
+        # print(further_preferences)
