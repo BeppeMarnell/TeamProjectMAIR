@@ -1,11 +1,12 @@
 from src.Chat.StateManager import State, StateManager
 import pandas as pd
 from src.rules import Rules
+import time
 
 
 class ChatManager:
 
-    def __init__(self, models):
+    def __init__(self, models, phrase_style="", mess_delay="", mess_caps=""):
         # Define properties
         self.models = models
         self.rules = Rules()
@@ -29,11 +30,29 @@ class ChatManager:
 
         self.print_text = ""
 
-        with open('assets/sys_utterances.txt', 'r') as inf:
+        if phrase_style == "informal":
+            file_name = "assets/inf_sys_utterances.txt"
+        else:
+            file_name = 'assets/sys_utterances.txt'
+
+        with open(file_name, 'r') as inf:
             for line in inf:
                 line = line.replace('\n', '')
                 keys = line.split(' ')
-                self.sys_utter[keys[0]] = ' '.join(keys[1:])
+                if mess_caps == "caps":
+                    self.sys_utter[keys[0]] = ' '.join(keys[1:]).upper()
+                else:
+                    self.sys_utter[keys[0]] = ' '.join(keys[1:])
+
+        if mess_delay == "delay":
+            self.delay = True
+            self.delay_mess = False
+        if mess_delay == "delay_mess":
+            self.delay = True
+            self.delay_mess = True
+        else:
+            self.delay = False
+            self.delay_mess = False
 
         # Print the first system message
         print(self.sys_utter['welcome'])
@@ -41,6 +60,11 @@ class ChatManager:
     def run(self):
         # Start the chat loop
         while True:
+
+            if self.delay:
+                if self.delay_mess:
+                    print(self.sys_utter['loading'])
+                time.sleep(2)
 
             # Check system state and preferences
             self.SystemStateUtterance()
@@ -154,7 +178,9 @@ class ChatManager:
             # same as affirm
             if self.state == State.S3 and len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
-                                                                   self.models.recommendation['restaurantname'])
+                                                                        self.models.recommendation['restaurantname'])\
+                                                                        .replace('RESTAURANT_NAME', self.models
+                                                                                 .recommendation['restaurantname'])
                 print(self.print_text)
                 return
 
@@ -162,7 +188,9 @@ class ChatManager:
             # same as ack
             if self.state == State.S3 and len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
-                                                                   self.models.recommendation['restaurantname'])
+                                                                        self.models.recommendation['restaurantname'])\
+                                                                        .replace('RESTAURANT_NAME', self.models
+                                                                                 .recommendation['restaurantname'])
                 print(self.print_text)
                 return
 
@@ -212,43 +240,55 @@ class ChatManager:
             if food:
                 if food_correct:
                     text = self.sys_utter[confirmtrue].replace('preference_name', 'type')\
-                        .replace('preference_value', food_pref)
+                        .replace('preference_value', food_pref).replace('PREFERENCE_NAME', 'TYPE')\
+                        .replace('PREFERENCE_VALUE', food_pref)
                 elif food_given:
                     text = self.sys_utter[confirmfalse].replace('preference_name', 'type')\
-                        .replace('preference_value', food_pref)
+                        .replace('preference_value', food_pref).replace('PREFERENCE_NAME', 'TYPE')\
+                        .replace('PREFERENCE_VALUE', food_pref)
                 else:
                     text = self.sys_utter[confirmfalse].replace('preference_name', 'type of restaurant')\
-                        .replace('preference_value', 'not specified')
+                        .replace('preference_value', 'not specified').replace('PREFERENCE_NAME', 'TYPE OF RESTAURANT')\
+                        .replace('PREFERENCE_VALUE', 'NOT SPECIFIED')
                 if recommend:
-                    text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])
+                    text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])\
+                               .replace('RESTAURANT_NAME', self.models.recommendation['restaurantname'])
                 print(text)
 
             if area:
                 if area_correct:
                     text = self.sys_utter[confirmtrue].replace('preference_name', 'area')\
-                        .replace('preference_value', area_pref)
+                        .replace('preference_value', area_pref).replace('PREFERENCE_NAME', 'AREA')\
+                        .replace('PREFERENCE_VALUE', area_pref)
                 elif area_given:
                     text = self.sys_utter[confirmfalse].replace('preference_name', 'area')\
-                        .replace('preference_value', area_pref)
+                        .replace('preference_value', area_pref).replace('PREFERENCE_NAME', 'AREA')\
+                        .replace('PREFERENCE_VALUE', area_pref)
                 else:
                     text = self.sys_utter[confirmfalse].replace('preference_name', 'area')\
-                        .replace('preference_value', 'not specified')
+                        .replace('preference_value', 'not specified').replace('PREFERENCE_NAME', 'AREA')\
+                        .replace('PREFERENCE_VALUE', 'NOT SPECIFIED')
                 if recommend:
-                    text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])
+                    text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])\
+                               .replace('RESTAURANT_NAME', self.models.recommendation['restaurantname'])
                 print(text)
 
             if price:
                 if price_correct:
                     text = self.sys_utter[confirmtrue].replace('preference_name', 'price')\
-                        .replace('preference_value', price_pref)
+                        .replace('preference_value', price_pref).replace('PREFERENCE_NAME', 'PRICE')\
+                        .replace('PREFERENCE_VALUE', price_pref)
                 elif price_given:
                     text = self.sys_utter[confirmfalse].replace('preference_name', 'price')\
-                        .replace('preference_value', price_pref)
+                        .replace('preference_value', price_pref).replace('PREFERENCE_NAME', 'PRICE')\
+                        .replace('PREFERENCE_VALUE', price_pref)
                 else:
                     text = self.sys_utter[confirmfalse].replace('preference_name', 'price')\
-                        .replace('preference_value', 'not specified')
+                        .replace('preference_value', 'not specified').replace('PREFERENCE_NAME', 'PRICE')\
+                        .replace('PREFERENCE_VALUE', 'NOT SPECIFIED')
                 if recommend:
-                    text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])
+                    text = text.replace('restaurant_name', self.models.recommendation['restaurantname'])\
+                           .replace('RESTAURANT_NAME', self.models.recommendation['restaurantname'])
                 print(text)
             return
 
@@ -278,13 +318,37 @@ class ChatManager:
 
         if utterance == 'inform':
             # Update preferences and state
-            self.update_preferences(user_input)
+            new_preferences = self.models.extractPreference(user_input, self.sys_utter)
+            # Change preferences where necessary
+            if new_preferences['food'] != '':
+                self.pref_df.at[0, 'food'] = new_preferences['food']
+                self.models.restaurants = []
+
+            if new_preferences['area'] != '':
+                self.pref_df.at[0, 'area'] = new_preferences['area']
+                self.models.restaurants = []
+
+            if new_preferences['pricerange'] != '':
+                self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
+                self.models.restaurants = []
             return
 
         if utterance == 'negate':
             # no in any area or no i want korean food
             # Update preferences and state
-            self.update_preferences(user_input)
+            new_preferences = self.models.extractPreference(user_input, self.sys_utter)
+            # Change preferences where necessary
+            if new_preferences['food'] != '':
+                self.pref_df.at[0, 'food'] = new_preferences['food']
+                self.models.restaurants = []
+
+            if new_preferences['area'] != '':
+                self.pref_df.at[0, 'area'] = new_preferences['area']
+                self.models.restaurants = []
+
+            if new_preferences['pricerange'] != '':
+                self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
+                self.models.restaurants = []
 
             # TODO add possibility to choose "not korean food" or "not in the center"
             # new_preferences = self.models.negative_preferences(user_input)
@@ -301,7 +365,19 @@ class ChatManager:
 
         if utterance == 'reqalts':
             # same as inform
-            self.update_preferences(user_input)
+            new_preferences = self.models.extractPreference(user_input, self.sys_utter)
+            # Change preferences where necessary
+            if new_preferences['food'] != '':
+                self.pref_df.at[0, 'food'] = new_preferences['food']
+                self.models.restaurants = []
+
+            if new_preferences['area'] != '':
+                self.pref_df.at[0, 'area'] = new_preferences['area']
+                self.models.restaurants = []
+
+            if new_preferences['pricerange'] != '':
+                self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
+                self.models.restaurants = []
             return
 
         if utterance == 'reqmore':
@@ -314,7 +390,8 @@ class ChatManager:
                 details = self.models.extract_details(user_input)
                 for element in details:
                     print(self.sys_utter['details'].replace('detail_type', element[0])
-                          .replace('detail_info', element[1]))
+                          .replace('detail_info', element[1]).replace('DETAIL_TYPE', element[0])
+                          .replace('DETAIL_INFO', element[1]))
                 return
 
         if utterance == 'restart':
