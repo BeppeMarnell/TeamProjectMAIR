@@ -1,5 +1,6 @@
 from src.Chat.StateManager import State, StateManager
 import pandas as pd
+from src.rules import Rules
 import time
 
 
@@ -8,6 +9,7 @@ class ChatManager:
     def __init__(self, models, phrase_style="", mess_delay="", mess_caps=""):
         # Define properties
         self.models = models
+        self.rules = Rules()
 
         # Define preferences
         pref = {
@@ -15,7 +17,9 @@ class ChatManager:
             'area': '',
             'food': ''
         }
+
         self.pref_df = pd.DataFrame(pref, index=[0])
+
 
         # Manage states
         self.state = State.S1
@@ -55,7 +59,6 @@ class ChatManager:
 
     def run(self):
         # Start the chat loop
-        index = 0
         while True:
 
             if self.delay:
@@ -65,15 +68,6 @@ class ChatManager:
 
             # Check system state and preferences
             self.SystemStateUtterance()
-
-            if self.state == State.S1:
-                # Define preferences
-                pref = {
-                    'pricerange': '',
-                    'area': '',
-                    'food': ''
-                }
-                self.pref_df = pd.DataFrame(pref, index=[0])
 
             # S5 is the end state, therefore terminate the program
             if self.state == State.S5:
@@ -97,10 +91,12 @@ class ChatManager:
             
             elif new_state == State.S2 and self.state == State.S3 and utterance == 'deny':
                 print('-----> Okay then we will take that into account')
-                #print(self.pref_df)
+                # print(self.pref_df)
             
             if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'):
                 self.models.recommend(self.pref_df)
+                print(self.models.restaurants)
+
 
             # print('')
             # print('utterance: ')
@@ -150,9 +146,25 @@ class ChatManager:
                 self.print_text = self.sys_utter['nomoreresults']
             else:
                 self.print_text = self.sys_utter['suggestrest'].replace('restaurant_name',
-                                                                        self.models.recommendation['restaurantname'])\
-                                                                        .replace('RESTAURANT_NAME', self.models
-                                                                                 .recommendation['restaurantname'])
+                                                                        self.models.recommendation['restaurantname'])
+
+                # Compute implications
+                consequents, reason = self.rules.solve_rule(self.models.recommendation)
+
+                # Inform about the implications
+                for cons in consequents:
+                    if consequents[cons] is not None:
+                        self.print_text += '\n'
+                        text = 'not '
+                        if cons == 'children' and cons == 'long time':
+                            text = 'not for'
+
+                        if consequents[cons]:
+                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons)
+                        else:
+                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', ''.join([text, cons]))
+
+            # "What about ....
             print(self.print_text)
             return
 
@@ -206,7 +218,10 @@ class ChatManager:
                 recommend = True
 
             # Update preferences and state
-            new_preferences = self.models.extractPreference(user_input, self.sys_utter)
+            new_preferences = self.models.extractPreference(user_input)
+
+            # TODO use further preferences
+            further_preferences = self.rules.extract_implications(user_input)
             # check what preference to confirm
             food = True if new_preferences['food'] != '' else False
             area = True if new_preferences['area'] != '' else False
@@ -278,12 +293,12 @@ class ChatManager:
             return
 
         if utterance == 'deny':
-        # Wrong
-        # I dont want 
+            # Wrong
+            # I dont want
             user_input_split = user_input.split()
             for i in user_input_split: 
                 if i == 'dont':
-                    #print('succes')
+                    # print('succes')
                     for preferences in ['food', 'area', 'pricerange']:
                         if self.pref_df[preferences].tolist()[0] in user_input:
                             self.pref_df[preferences] = ''
@@ -292,7 +307,7 @@ class ChatManager:
 
                 if i == 'wrong':
                     for preferences in ['food', 'area', 'pricerange']:
-                        #if self.pref_df[preferences].tolist()[0] in user_input:
+                        # if self.pref_df[preferences].tolist()[0] in user_input:
                         self.pref_df[preferences] = ''
                         self.models.restaurants = []
                         return 
@@ -392,3 +407,21 @@ class ChatManager:
         print(self.print_text)
         return
 
+    def update_preferences(self, user_input):
+        new_preferences = self.models.extractPreference(user_input)
+        further_preferences = self.rules.extract_implications(user_input)
+        # Change preferences where necessary
+        if new_preferences['food'] != '':
+            self.pref_df.at[0, 'food'] = new_preferences['food']
+            self.models.restaurants = []
+
+        if new_preferences['area'] != '':
+            self.pref_df.at[0, 'area'] = new_preferences['area']
+            self.models.restaurants = []
+
+        if new_preferences['pricerange'] != '':
+            self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
+            self.models.restaurants = []
+
+        # self.rules.further_pref_df.at[0] = further_preferences
+        # print(further_preferences)

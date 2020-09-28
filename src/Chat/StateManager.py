@@ -4,8 +4,6 @@ from enum import Enum
 class StateManager:
 
     def __init__(self):
-        #TODO: update the graph according to graph in Teams
-
         # Create the graph
         s1 = StateNode(State.S1)
         s2 = StateNode(State.S2)
