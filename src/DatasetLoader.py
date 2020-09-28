@@ -12,17 +12,9 @@ class DatasetLoader:
         self.utterances_df = pd.read_csv('assets/dialog_acts.dat', names=['dialog_act'])
         self.utterances_df[['dialog_act', 'utterance_content']] = self.utterances_df["dialog_act"].str.split(" ", 1, expand=True)
 
-        self.restaurant_info_df = pd.read_csv("assets/restaurant_info.csv")
+        self.restaurant_info_df = pd.read_csv("assets/restaurant_info2.csv")
         # Some features were empty, let's replace them with 'unknown'
         self.restaurant_info_df = self.restaurant_info_df.replace(np.nan, 'unknown', regex=True)
-
-        # add food quality to database
-        quality = []
-        qualities = ['good', 'moderate', 'bad']
-        for i, row in enumerate(self.restaurant_info_df.values):
-            r = random.randint(0, 2)
-            quality.append(qualities[r])
-        self.restaurant_info_df['foodquality'] = quality
 
         # Clean the dataset
         self.__clean(baseline2)
