@@ -8,7 +8,7 @@ The project is divided into two parts:
 - The second part of the project is about evaluating your system: designing, carrying out and reporting on user experiments, as well as thinking about your system in the wider context of AI.
 
 # How to install
-## Required libraries
+### Required libraries
 MAIRDISY is written in python 3 and it utilises various libraries:
 > Be sure all the following libraries are installed
 
