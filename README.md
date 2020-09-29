@@ -1,5 +1,4 @@
-# Welcome to the dialog system project, 
-# MAIRDISY (MAIR DIalog SYstem).
+# Welcome to MAIRDISY (MAIR DIalog SYstem).
 
 The project consists in designing, implementing, evaluating and writing about a restaurant recommendations dialog system using various methods from AI, such as domain modeling, text classification using machine learning and user experience testing. The dialog system is programmed in Python 3. The program is terminal/command line based. No graphical user interface was used. 
 
