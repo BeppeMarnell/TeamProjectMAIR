@@ -249,13 +249,11 @@ class Models:
         # In case the food is not found, use some keyword matching,
         # maybe there is a spelling error
 
-        # TODO keywords matching here
+        # keywords matching here
 
         track_replaced = []
 
         for missing_pref in ['food', 'area', 'pricerange']:
-
-            #words = string.split(" ")
 
             if pref[missing_pref] == '':
                 keywords = {'food': [['food'], ['restaurant']], 'area': [['in', 'the'], ['area']],
@@ -349,62 +347,12 @@ class Models:
                             print(sys_utter['word_not_exist'].replace('miss_word', miss_word)
                                   .replace('MISS_WORD', miss_word))
                             print(sys_utter['apologize'])
-                            # print("-----> Either", miss_word,
-                            #      "does not occur in my database or something else went wrong.")
-                            # print("-----> I apologize for the inconvenience. Please try something else.")
-        '''
-                words = string.split(" ")
-                if pref['food'] == '':
-                    # Extract variable before keyword 'food'
-                    # words = string.split(" ")
-                    keywords = ['food', 'kind']
-                    for keyword in keywords:
-                        if keyword in words:
-                            miss_word = ''
-
-                            for indx in range(0, len(words)):
-                                if words[indx] == keyword:
-                                    miss_word = words[indx - 1]
-
-                            if miss_word == 'any' or miss_word == 'world':
-                                pref['food'] = 'any'
-                            else:
-                                pref['food'] = self.get_levenshtein_items([miss_word], self.foods)
-
-                if pref['area'] == '':
-                    # Only use words in sentences that contain in (like in the center, ...)
-                    keywords = ['in', 'area']
-                    for keyword in keywords:
-                        if keyword in words:
-                            miss_word = ''
-
-                            for indx in range(0, len(words)):
-                                if words[indx] == keyword:
-                                    if words[indx + 1] == 'the':
-                                        miss_word = words[indx + 2]
-                            # TODO find alternatives for any
-                            if 'any' in words:
-                                pref['area'] = 'any'
-                            else:
-                                pref['area'] = self.get_levenshtein_items([miss_word], self.areas)
-
-                if pref['pricerange'] == '':
-                    # TODO find keywords
-                    keywords = ['price', 'restaurant', 'priced']
-                    for keyword in keywords:
-                        if keyword in words:
-                            if 'any' == words[words.index(keyword) - 1]:
-                                pref['pricerange'] = 'any'
-                            else:
-                                pref['pricerange'] = self.get_levenshtein_items(words, self.price_ranges)
-        '''
         return pref
 
     def __patternMatchingRequest(self, miss_word, entry, sys_utter):
         # If the user writes something that could resemble a word in the dataset,
         # it is asked if the matched word is what the user meant
 
-        #print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
         print(sys_utter['clarify'].replace('miss_word', miss_word).replace('entry', entry)
               .replace('MISS_WORD', miss_word).replace('ENTRY', entry))
         user_input = input("-----> ")
@@ -412,9 +360,7 @@ class Models:
 
         while utterance != 'affirm' and utterance != 'negate':
             if utterance != 'repeat':
-                #print("-----> Please answer the question.")
                 print(sys_utter['repeat_ask'])
-            #print("-----> I did not recognize", miss_word, ". Did you mean:", entry, "?")
             print(sys_utter['clarify'].replace('miss_word', miss_word).replace('entry', entry)
                   .replace('MISS_WORD', miss_word).replace('ENTRY', entry))
             user_input = input("-----> ")
@@ -471,7 +417,13 @@ class Models:
             pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
 
         #print("Price", pricerange)
-        restaurants = self.dataset.restaurant_info_df.loc[food & area & pricerange]
+
+        # prevent from crashing due to all no preferences
+        if isinstance(food, bool) and isinstance(area, bool) and isinstance(pricerange, bool) \
+                and food and area and pricerange:
+            restaurants = self.dataset.restaurant_info_df
+        else:
+            restaurants = self.dataset.restaurant_info_df.loc[food & area & pricerange]
         #print("Restaurants",restaurants)
         self.restaurants = restaurants.reset_index()
 

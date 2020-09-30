@@ -12,13 +12,17 @@ confirmtrue -----> Yep, the preference_name is preference_value.
 confirmfalse -----> Nope, the preference_name is preference_value.
 confirmtruerest -----> Yep, the preference_name of restaurant_name is preference_value.
 confirmfalserest -----> Nope, the preference_name of restaurant_name is preference_value.
+implicationunknown -----> I'm sorry, I don't know if the restaurant is preference_name.
+askforimplication -----> It is qualities.
 affirm -----> Great, you chose restaurant_name. What would you like to know about it?
 misunderstanding -----> Sorry, I can't see what you're saying, can you say it again?
 restart -----> Alright, let's start over.
+deny -----> Oh sorry, what are your actual preferences?
 bye -----> Glad to have helped. See you soon!
 clarify -----> I don't know what you mean with miss_word . Did you actually mean: entry ?
 repeat_ask -----> Please answer the question.
 word_not_exist -----> Either miss_word does not occur in my database or something else went wrong.
 apologize -----> Sorry. Please try something else.
 loading -----> hold up, loading some stuff...
+alternatives -----> Alternative option: restaurant restaurant_name is serving food_name food in area_name part of town for price_range price.
 

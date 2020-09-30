@@ -189,8 +189,8 @@ class ChatManager:
                 self.print_text = self.sys_utter['nomoreresults']
                 print(self.print_text)
             else:
-                self.print_text = self.sys_utter['suggestrest'].replace('restaurant_name',
-                                                                        self.models.recommendation['restaurantname'])
+                self.print_text = self.sys_utter['suggestrest'].replace('restaurant_name', self.models.recommendation['restaurantname'])\
+                    .replace('RESTAURANT_NAME',self.models.recommendation['restaurantname'])
 
                 # Compute implications
                 consequents, reason = self.rules.solve_rule(self.models.recommendation)
@@ -204,9 +204,9 @@ class ChatManager:
                             text = 'not for '
 
                         if consequents[cons]:
-                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons)
+                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons).replace('QUALITIES', cons)
                         else:
-                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', ''.join([text, cons]))
+                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', ''.join([text, cons])).replace('QUALITIES', ''.join([text, cons]))
 
             # "What about ....
             print(self.print_text)
