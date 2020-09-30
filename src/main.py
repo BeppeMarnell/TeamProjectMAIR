@@ -4,14 +4,17 @@ from src.Models import Models
 import time
 import sys
 import argparse
+import os
 
+cwd = os.getcwd()  # Get the current working directory (cwd)
+files = os.listdir(cwd)  # Get all the files in that directory
+print("Files in %r: %s" % (cwd, files))
 
 class Main:
 
     def __init__(self, formal, delay, caps):
         # Load the dataset
         data = DatasetLoader()
-
         # Create and train the models
         modelz = Models(data)
         # modelz.showPerformances()

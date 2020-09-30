@@ -46,11 +46,13 @@ class DatasetLoader:
 
         # Implement the 2nd baseline system A baseline rule-based system based on keyword matching. An example rule
         # could be: anytime an utterance contains ‘goodbye’, it would be classified with the dialog act bye.
-        if baseline2:
-            indx = self.utterances_df.loc[self.utterances_df['utterance_content'].str.contains("have a nice day")].index
 
-            for i in indx:
-                self.utterances_df.loc[i, 'dialog_act'] = "bye"
+        ## Can be removed?
+        #if baseline2:
+        #    indx = self.utterances_df.loc[self.utterances_df['utterance_content'].str.contains("have a nice day")].index
+
+            #for i in indx:
+             #   self.utterances_df.loc[i, 'dialog_act'] = "bye"
 
     def showHead(self):
         print(self.utterances_df.head())
