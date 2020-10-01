@@ -2,9 +2,9 @@ from src.Chat.ChatManager import ChatManager
 from src.DatasetLoader import DatasetLoader
 from src.Models import Models
 import time
-import sys
 import argparse
 import os
+import sys
 
 cwd = os.getcwd()  # Get the current working directory (cwd)
 files = os.listdir(cwd)  # Get all the files in that directory

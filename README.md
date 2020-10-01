@@ -31,17 +31,17 @@ Using an IDE, you can import the project from version control, using: `https://g
 ### Configurable parameters
 > For formal language, run MAIRDISY: 
 ```shell
-python3 -m unittest src/main.py --formal
+python3 main.py --formal FORMAL
 ```
 
 > For system delay, run MAIRDISY:
 ```shell
-python3 -m unittest src/main.py --delay
+python3 main.py --delay DELAY
 ```
 
 > For System with all CAPS, run MAIRDISY:
 ```shell
-python3 -m unittest src/main.py --caps
+python3 main.py --caps CAPS
 ```
 
 <!-- # Transition diagram:
