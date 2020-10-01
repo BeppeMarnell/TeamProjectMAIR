@@ -46,5 +46,3 @@ python3 -m unittest src/main.py --caps
 
 <!-- # Transition diagram:
 ![Image of Yaktocat](diagram.jpg) -->
-
-
