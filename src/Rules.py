@@ -1,26 +1,25 @@
-import pandas as pd
-
-
 class Rules:
     """
-    1	cheap, good food	    busy	    True	1	a cheap restaurant with good food is busy
-    2	spanish	                long time	True	1	Spanish restaurants serve extensive dinners that take a long time to finish
+    1	cheap, good food        busy	        True	1	a cheap restaurant with good food is busy
+    2	spanish	                long time	True	1	Spanish restaurants serve extensive dinners
+                                                                that take a long time to finish
     3	busy	                long time	True	2	you spend a long time in a busy restaurant (waiting for food)
-    4	long time	            children	False	2	spending a long time is not advised when taking children
+    4	long time	        children	False	2	spending a long time is not advised when taking children
     5	busy	                romantic	False	2	a busy restaurant is not romantic
-    6	long time	            romantic	True	2	spending a long time in a restaurant is romantic
+    6	long time	        romantic	True	2	spending a long time in a restaurant is romantic
 
     Our rules:
-    7   [cheap, !centre]        busy        False   1   a cheap restaurant outside the centre is not busy
-    8   [expensive]             long time   True    1   you spend a lot of time in an expensive restaurant
-    9   [cheap, international]  fast food   True    1   cheap international food is fast food
-    10  [steakhouse]            vegetarian  False   1   a steakhouse is not vegetarian
-    11  [fast food]             romantic    False   2   fast food is not romantic
-    12  [fast food]             children    True    2   children like fast food
-    13  [vegetarian, cheap]     busy        True    2   a cheap vegetarian restaurant is busy
+    7   cheap, !centre          busy            False   1   a cheap restaurant outside the centre is not busy
+    8   expensive               long time       True    1   you spend a lot of time in an expensive restaurant
+    9   cheap, international    fast food       True    1   cheap international food is fast food
+    10  steakhouse              vegetarian      False   1   a steakhouse is not vegetarian
+    11  fast food               romantic        False   2   fast food is not romantic
+    12  fast food               children        True    2   children like fast food
+    13  vegetarian, cheap       busy            True    2   a cheap vegetarian restaurant is busy
     """
 
     def __init__(self):
+        # dictionary containing the truth value of the consequent after executing all rules
         self.consequents = {
             'busy': None,
             'long time': None,
@@ -29,14 +28,7 @@ class Rules:
             'fast food': None,
             'vegetarian': None
         }
-        self.asked_consequents = {
-            'busy': False,
-            'long time': False,
-            'children': False,
-            'romantic': False,
-            'fast food': False,
-            'vegetarian': False
-        }
+        # reason why the consequent is true or false
         self.reason = {
             'busy': '',
             'long time': '',
@@ -54,21 +46,10 @@ class Rules:
             'fast food': 0,
             'vegetarian': 0
         }
-        # self.consequents_df = pd.DataFrame(self.consequents, index=[0])
 
-    def extract_implications(self, string):
-        string = string.lower()
+    def __solveRule(self, restaurant, consequents):
+        # Internal method called repeatedly to evaluate all rules
 
-        # Preference extraction by pricerange, area and food
-
-        for pref in self.asked_consequents.keys():
-            if pref in string:
-                self.asked_consequents[pref] = True
-
-        #print(self.asked_consequents)
-        return self.asked_consequents
-
-    def __solve_rule(self, restaurant, consequents):
         # set antecedents known from the data set
         cheap = True if restaurant['pricerange'] == 'cheap' else False
         good = True if restaurant['foodquality'] == 'good' else False
@@ -168,7 +149,9 @@ class Rules:
 
         return new_consequents
 
-    def solve_rule(self, restaurant):
+    def solveRule(self, restaurant):
+        # Function to set the consequents by evaluating all rules for a given restaurants
+
         # set consequents
         consequents = {
             'busy': None,
@@ -183,7 +166,7 @@ class Rules:
 
         # loop until new consequents are the same as previous consequents (closure under implication)
         while not_changed is False:
-            new_consequents = self.__solve_rule(restaurant, consequents)
+            new_consequents = self.__solveRule(restaurant, consequents)
             if new_consequents == consequents:
                 # quit if no change happened in this iteration
                 not_changed = True
@@ -194,18 +177,3 @@ class Rules:
             self.consequents = new_consequents
 
         return self.consequents, self.reason
-
-
-if __name__ == '__main__':
-    rule = Rules()
-    # rule.set_rules()
-    # restaurant = {"restaurantname": "pizza express", "pricerange": "cheap", "area": "centre",
-    #               "food": "spanish", "phone": "01223 324033", "addr": "", "post": "c.b 2", "foodquality": "moderate"}
-    restaurant = {"restaurantname": "pizza express", "pricerange": "expensive", "area": "centre",
-                  "food": "spanish", "phone": "01223 324033", "addr": "", "post": "c.b 2", "foodquality": "good"}
-
-    print(rule.consequents)
-    answer, reason = rule.solve_rule(restaurant)
-    print(answer)
-    print(reason)
-    print(rule.priorities)
