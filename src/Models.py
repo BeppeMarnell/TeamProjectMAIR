@@ -418,7 +418,7 @@ class Models:
 
         #print("Price", pricerange)
 
-        # prevent from crashing due to all no preferences
+        # prevent from crashing due to no preferences
         if isinstance(food, bool) and isinstance(area, bool) and isinstance(pricerange, bool) \
                 and food and area and pricerange:
             restaurants = self.dataset.restaurant_info_df
