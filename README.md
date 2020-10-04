@@ -52,9 +52,9 @@ optional arguments:
   --caps CAPS      Use 'caps' for system output to be in all caps.
 ```
 
-> For formal language, run MAIRDISY: 
+> For informal language, run MAIRDISY: 
 ```shell
-python3 main.py --formal 'formal'
+python3 main.py --formal 'informal'
 ```
 
 > For system delay, run MAIRDISY:
