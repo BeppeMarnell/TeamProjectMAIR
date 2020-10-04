@@ -1,6 +1,10 @@
-from src.Chat.StateManager import State, StateManager
+try:
+    from Chat.StateManager import State, StateManager
+    from Rules import Rules
+except ImportError:
+    from src.Chat.StateManager import State, StateManager
+    from src.Rules import Rules
 import pandas as pd
-from src.rules import Rules
 import time
 
 
@@ -20,15 +24,15 @@ class ChatManager:
 
         self.pref_df = pd.DataFrame(pref, index=[0])
 
-
         # Manage states
         self.state = State.S1
         self.__state_manager = StateManager()
 
+        # Save last printed text for repeat utterance
+        self.print_text = ""
+
         # Load the System utterances
         self.sys_utter = {}
-
-        self.print_text = ""
 
         if phrase_style == "informal":
             file_name = "assets/inf_sys_utterances.txt"
@@ -67,10 +71,11 @@ class ChatManager:
                 time.sleep(2)
 
             # Check system state and preferences
-            self.SystemStateUtterance()
+            self.systemStateUtterance()
 
             if self.state == State.S1:
                 # Define preferences
+                # necessary if user wants to start from beginning again
                 pref = {
                     'pricerange': '',
                     'area': '',
@@ -85,35 +90,34 @@ class ChatManager:
             # Ask user for input
             user_input = input('-----> ')
 
-            #check restaurant recommendation
-
             # Evaluate inputted utterance and check the next state
             utterance = self.models.evalueNewUtterance(user_input)
             # print(utterance)
 
-            self.react_to_utterance(utterance, user_input)
+            # React based on what utterance
+            self.reactToUtterance(utterance, user_input)
 
+            # Use state manager to set new state
             new_state = self.__state_manager.processState(self.state, utterance, self.pref_df)
 
-            # if new state is S3, look up possible restaurants, that will be recommended in self.SystemStateUtterance()
-            # ensure that current state is either S3 or the utterance asks for another result
-            # otherwise, it would recommend a different restaurant even though the user just asked for confirmation
+            # Print extra message to inform user that deny utterance was understood.
             if new_state == State.S2 and self.state == State.S3 and utterance == 'deny' and user_input == 'wrong':
                 print('-----> We will restart because it is wrong')
 
             elif new_state == State.S2 and self.state == State.S3 and utterance == 'deny':
                 print('-----> Okay then we will take that into account')
-                # print(self.pref_df)
 
-            if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'):
+            # if new state is S3, look up possible restaurants, that will be recommended in self.SystemStateUtterance()
+            # ensure that current state is either not S3 or the utterance asks for another result
+            # otherwise, it would recommend a different restaurant even though the user just asked for confirmation
+            if new_state == State.S3 and (self.state != State.S3 or utterance == 'reqmore' or utterance == 'reqalts'
+                                          or utterance == 'negate'):
                 self.models.recommend(self.pref_df)
-                #print(self.models.restaurants)
 
-
+            # Prints that can be uncommented for debugging (show utterance, state, preferences, new state)
             # print('')
             # print('utterance: ')
             # print(utterance)
-            # # print(new_preferences)
             # print('preference: ')
             # print(self.pref_df.loc[0])
             # print('current state: ')
@@ -123,55 +127,61 @@ class ChatManager:
 
             self.state = new_state
 
-    def SystemStateUtterance(self):
+    def systemStateUtterance(self):
+        # Function that prints a message to the user at the beginning of each state to either ask a question
+        # or inform user about the thing he requested in the previous iteration
+
         # Check whether the preferences are filled
         food = True if self.pref_df['food'].tolist()[0] != '' else False
         area = True if self.pref_df['area'].tolist()[0] != '' else False
         price = True if self.pref_df['pricerange'].tolist()[0] != '' else False
 
-        # Check the state
         if self.state == State.S1:
             self.print_text = self.sys_utter['state1']
             print(self.print_text)
             return
 
+        # ask for food if preference is not set and multiple restaurants apply for other preferences
         if self.state == State.S2 and not food:
 
-            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.lookupInRestaurantInfo(self.pref_df)
 
             # If there are 0 or 1 restaurants for the preferences, go to state 3
             if len(self.models.restaurants) <= 1:
                 self.state = State.S3
                 self.models.recommend(self.pref_df)
 
+            # If the length of the restaurant recommendations is >1, continue normally
             else:
                 self.print_text = self.sys_utter['askfood']
                 print(self.print_text)
                 return
 
+        # ask for area if preference is not set and multiple restaurants apply for other preferences
         if self.state == State.S2 and not area:
 
-            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.lookupInRestaurantInfo(self.pref_df)
 
             # If there are 0 or 1 restaurants for the preferences, go to state 3
             if len(self.models.restaurants) <= 1:
                 self.state = State.S3
                 self.models.recommend(self.pref_df)
 
+            # If the length of the restaurant recommendations is >1, continue normally
             else:
                 self.print_text = self.sys_utter['askarea']
                 print(self.print_text)
                 return
 
+        # ask for price if preference is not set and multiple restaurants apply for other preferences
         if self.state == State.S2 and not price:
 
-            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.lookupInRestaurantInfo(self.pref_df)
 
             # If there are 0 or 1 restaurants for the preferences, go to state 3
             if len(self.models.restaurants) <= 1:
                 self.state = State.S3
                 self.models.recommend(self.pref_df)
-
 
             # If the length of the restaurant recommendations is >1, continue normally
             else:
@@ -179,21 +189,45 @@ class ChatManager:
                 print(self.print_text)
                 return
 
-        # Recommend until the recommendationlist is empty
+        if self.state == State.S2 and food and area and price:
+            # when changing a preference in state 3, the user gets send back to state 2.
+            # If however, all preferences are set again,
+            # the user gets asked this irrelevant question to avoid an empty line, where user has to press enter
+            # ask user to either confirm their choice for food, area or price
+            if self.pref_df['food'].tolist()[0] != 'any':
+                self.print_text = self.sys_utter['confirmquestion'].replace('preference_name', 'food')\
+                    .replace('preference_value', self.pref_df['food'].tolist()[0])
+                print(self.print_text)
+            elif self.pref_df['area'].tolist()[0] != 'any':
+                self.print_text = self.sys_utter['confirmquestion'].replace('preference_name', 'area') \
+                    .replace('preference_value', self.pref_df['area'].tolist()[0])
+                print(self.print_text)
+            elif self.pref_df['pricerange'].tolist()[0] != 'any':
+                self.print_text = self.sys_utter['confirmquestion'].replace('preference_name', 'pricerange') \
+                    .replace('preference_value', self.pref_df['pricerange'].tolist()[0])
+                print(self.print_text)
+            return
+
+        # recommend restaurant
         if self.state == State.S3:
             if len(self.models.recommendation) == 0:
                 # Suggest alternative options if there are no options
-                self.Suggest_Res(self.pref_df)
+                self.suggestRes(self.pref_df)
+                print(self.print_text)
 
             elif len(self.models.recommendation) == 1 and self.models.recommendation[0] == -1:
+                # recommendation is set to -1 if the user looped through all recommended restaurants.
+                # Warning will be printed to make user aware of this
                 self.print_text = self.sys_utter['nomoreresults']
                 print(self.print_text)
             else:
-                self.print_text = self.sys_utter['suggestrest'].replace('restaurant_name', self.models.recommendation['restaurantname'])\
+                # suggest possible restaurant
+                self.print_text = self.sys_utter['suggestrest']\
+                    .replace('restaurant_name', self.models.recommendation['restaurantname'])\
                     .replace('RESTAURANT_NAME',self.models.recommendation['restaurantname'])
 
                 # Compute implications
-                consequents, reason = self.rules.solve_rule(self.models.recommendation)
+                consequents, reason = self.rules.solveRule(self.models.recommendation)
 
                 # Inform about the implications
                 for cons in consequents:
@@ -204,12 +238,14 @@ class ChatManager:
                             text = 'not for '
 
                         if consequents[cons]:
-                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons).replace('QUALITIES', cons)
+                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', cons)\
+                                .replace('QUALITIES', cons)
                         else:
-                            self.print_text += self.sys_utter['askforimplication'].replace('qualities', ''.join([text, cons])).replace('QUALITIES', ''.join([text, cons]))
+                            self.print_text += self.sys_utter['askforimplication']\
+                                .replace('qualities', ''.join([text, cons])).replace('QUALITIES', ''.join([text, cons]))
 
-            # "What about ....
-            print(self.print_text)
+                # "What about ....
+                print(self.print_text)
             return
 
         if self.state == State.S5:
@@ -217,9 +253,17 @@ class ChatManager:
             print(self.print_text)
             return
 
-    def react_to_utterance(self, utterance, user_input):
+    def reactToUtterance(self, utterance, user_input):
+        # Function that calls the correct function or prints the correct system utterance
+        # based on the classified utterance.
+
         if utterance == 'ack':
-            # same as affirm
+            # same as affirm, kept separate to ease expandability in future, if the usage of one utterance changes
+            if self.state == State.S2:
+                # obligatory question will be asked to user, if he responds yes, go to state 3
+                # necessary, if user changes one preference in state 3 and goes back to state 2,
+                # even though all preferences are set again
+                return
             if self.state == State.S3 and len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
                                                                         self.models.recommendation['restaurantname'])\
@@ -229,7 +273,12 @@ class ChatManager:
                 return
 
         if utterance == 'affirm':
-            # same as ack
+            # same as ack, kept separate to ease expandability in future, if the usage of one utterance changes
+            if self.state == State.S2:
+                # obligatory question will be asked to user, if he responds yes, go to state 3
+                # necessary, if user changes one preference in state 3 and goes back to state 2,
+                # even though all preferences are set again
+                return
             if self.state == State.S3 and len(self.models.recommendation) != 0 and self.models.recommendation[0] != -1:
                 self.print_text = self.sys_utter['affirm'].replace('restaurant_name',
                                                                         self.models.recommendation['restaurantname'])\
@@ -261,12 +310,11 @@ class ChatManager:
                 # set recommend to true if there is currently a recommended restaurant
                 recommend = True
 
-            # Update preferences and state
-            new_preferences = self.models.extractPreference(user_input)
+            # Extract preference to confirm
+            new_preferences = self.models.extractPreference(user_input, self.sys_utter)
 
-            # TODO use further preferences
-            further_preferences = self.rules.extract_implications(user_input)
-            # check what preference to confirm
+            # check what preference did the user ask for
+            # example input: is the restaurant expensive?
             food = True if new_preferences['food'] != '' else False
             area = True if new_preferences['area'] != '' else False
             price = True if new_preferences['pricerange'] != '' else False
@@ -342,16 +390,16 @@ class ChatManager:
             user_input_split = user_input.split()
             for i in user_input_split:
                 if i == 'dont':
-                    # print('succes')
                     for preferences in ['food', 'area', 'pricerange']:
                         if self.pref_df[preferences].tolist()[0] in user_input:
+                            # remove preference that was not wanted and reset list of recommended restaurants
                             self.pref_df[preferences] = ''
                             self.models.restaurants = []
                             return
 
                 if i == 'wrong':
                     for preferences in ['food', 'area', 'pricerange']:
-                        # if self.pref_df[preferences].tolist()[0] in user_input:
+                        # remove all preferences and reset list of recommended restaurants
                         self.pref_df[preferences] = ''
                         self.models.restaurants = []
                         return
@@ -361,8 +409,9 @@ class ChatManager:
             return
 
         if utterance == 'inform':
-            # Update preferences and state
+            # Extract preferences of user
             new_preferences = self.models.extractPreference(user_input, self.sys_utter)
+
             # Change preferences where necessary
             if new_preferences['food'] != '':
                 self.pref_df.at[0, 'food'] = new_preferences['food']
@@ -387,8 +436,9 @@ class ChatManager:
                         self.models.restaurant = []
 
             # no in any area or no i want korean food
-            # Update preferences and state
+            # Extract preferences of user
             new_preferences = self.models.extractPreference(user_input, self.sys_utter)
+
             # Change preferences where necessary
             if new_preferences['food'] != '':
                 self.pref_df.at[0, 'food'] = new_preferences['food']
@@ -402,8 +452,6 @@ class ChatManager:
                 self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
                 self.models.restaurants = []
 
-            # TODO add possibility to choose "not korean food" or "not in the center"
-            # new_preferences = self.models.negative_preferences(user_input)
             return
 
         if utterance == 'null':
@@ -418,6 +466,7 @@ class ChatManager:
         if utterance == 'reqalts':
             # same as inform
             new_preferences = self.models.extractPreference(user_input, self.sys_utter)
+
             # Change preferences where necessary
             if new_preferences['food'] != '':
                 self.pref_df.at[0, 'food'] = new_preferences['food']
@@ -439,7 +488,7 @@ class ChatManager:
         if utterance == 'request':
             # evaluate the utterance if the user asks for more information (phone number, address, ...)
             if self.state == State.S4:
-                details = self.models.extract_details(user_input)
+                details = self.models.extractDetails(user_input)
                 for element in details:
                     print(self.sys_utter['details'].replace('detail_type', element[0])
                           .replace('detail_info', element[1]).replace('DETAIL_TYPE', element[0])
@@ -455,58 +504,43 @@ class ChatManager:
             # don't need to do anything, as it will automatically move to final state and print bye utterance
             return
 
+        # if utterance was not handled above, print message that input was not understood
+        # can for example happen, because it is not defined for the current state
         self.print_text = self.sys_utter['misunderstanding']
         print(self.print_text)
         return
 
-    def update_preferences(self, user_input):
-        new_preferences = self.models.extractPreference(user_input)
-        further_preferences = self.rules.extract_implications(user_input)
-        # Change preferences where necessary
-        if new_preferences['food'] != '':
-            self.pref_df.at[0, 'food'] = new_preferences['food']
-            self.models.restaurants = []
+    def suggestRes(self, preferences):
+        # Function to suggest alternatives for the restaurant
 
-        if new_preferences['area'] != '':
-            self.pref_df.at[0, 'area'] = new_preferences['area']
-            self.models.restaurants = []
-
-        if new_preferences['pricerange'] != '':
-            self.pref_df.at[0, 'pricerange'] = new_preferences['pricerange']
-            self.models.restaurants = []
-
-        # self.rules.further_pref_df.at[0] = further_preferences
-        # print(further_preferences)
-
-    # Function to suggest alternatives
-    def Suggest_Res(self, preferences):
-
-        # If a preference is filled, choose one preference to suggest alternatives. Set to other two at 'any'.
+        # If a preference is filled, choose one preference to suggest alternatives. Set the other two to 'any'.
         if preferences.loc[0]['food'] != 'any' or preferences.loc[0]['food'] != '':
             self.pref_df['area'] = 'any'
             self.pref_df['pricerange'] = 'any'
-            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.lookupInRestaurantInfo(self.pref_df)
             self.models.recommend(self.pref_df)
 
         elif preferences.loc[0]['area'] != 'any' or preferences.loc[0]['area'] != '':
             self.pref_df['food'] = 'any'
             self.pref_df['pricerange'] = 'any'
-            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.lookupInRestaurantInfo(self.pref_df)
             self.models.recommend(self.pref_df)
 
         elif preferences.loc[0]['pricerange'] != 'any' or preferences.loc[0]['pricerange'] != '':
             self.pref_df['area'] = 'any'
             self.pref_df['food'] = 'any'
-            self.models.lookup_in_restaurant_info(self.pref_df)
+            self.models.lookupInRestaurantInfo(self.pref_df)
             self.models.recommend(self.pref_df)
 
         # Suggest start over or the alternative
-        print('-----> There are no results for your preferences. You can type start over or look at the following alternative')
+        self.print_text = '-----> There are no results for your preferences. ' \
+                          'You can type start over or look at the following alternative' + '\n'
 
         alt_1 = self.sys_utter['alternatives'].replace('restaurant_name', self.models.recommendation['restaurantname'])\
-                        .replace('food_name', self.models.recommendation['food']).replace('area_name', self.models.recommendation['area']).replace('price_range', self.models.recommendation['pricerange'])
+            .replace('food_name', self.models.recommendation['food'])\
+            .replace('area_name', self.models.recommendation['area'])\
+            .replace('price_range', self.models.recommendation['pricerange'])
 
-        #self.models.recommend(self.pref_df)
-        print(alt_1)
-        print('-----> If you would like more alternatives, request more options. Otherwise, confirm the alternative please!')
-
+        self.print_text += alt_1 + '\n'
+        self.print_text += '-----> If you would like more alternatives, request more options. ' \
+                           'Otherwise, confirm the alternative please!'

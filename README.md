@@ -20,47 +20,29 @@ pip install scikit-learn
 pip install pandas
 pip install argparse
 ```
-### Run MAIRDISY - Console
+### Run MAIRDISY - IDE
 After downloading and extracting the .zip file containing the files in this repository, 
-extract those. In that new folder there are all the classes containg MAIRDISY.
-
-> Enter to the project folder and run main.py
->
-```shell
-python3 -m unittest src/main.py 
-```
+extract those. Put those files in your favourite IDE and run from the main.py class.
 
 ### Run MAIRDISY - Importing from version control
 Using an IDE, you can import the project from version control, using: `https://github.com/BeppeMarnell/TeamProjectMAIR`
 
 
 ### Configurable parameters
-> For formal language, add the following in the main method 
+> For formal language, run MAIRDISY: 
 ```shell
-p = argparse.ArgumentParser()
-p.add_argument("--formal", help="formal or informal system speach. Use informal for informal "speech.", default="formal")
-args = p.parse_args(sys.argv[1:])
-Main(args.formal, args.delay, args.caps)
+python3 main.py --formal FORMAL
 ```
 
-> For system delay, add the following in the main method
+> For system delay, run MAIRDISY:
 ```shell
-p = argparse.ArgumentParser()
-p.add_argument("--delay", help="Use delay for a delay of 2 seconds. Use mess_delay for a delay of 2 seconds "accompanied with a message. Use off for no delay", default="off")
-Main(args.formal, args.delay, args.caps)
+python3 main.py --delay DELAY
 ```
 
-> For System with all CAPS, add the following in the main method
+> For System with all CAPS, run MAIRDISY:
 ```shell
-p = argparse.ArgumentParser()
-p.add_argument("--caps", help="Use caps for system output to be in all caps.", default="no_caps")
-args = p.parse_args(sys.argv[1:])
-Main(args.formal, args.delay, args.caps)
+python3 main.py --caps CAPS
 ```
-
-
 
 <!-- # Transition diagram:
 ![Image of Yaktocat](diagram.jpg) -->
-
-

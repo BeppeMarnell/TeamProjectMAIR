@@ -8,6 +8,7 @@ nofoodres -----> Could you specify the type of food?
 noresults -----> There are no results for your preferences. Please try again with different preferences.
 nomoreresults -----> There are no further results for your preferences. Request another to show the first one again.
 details -----> The detail_type is detail_info.
+confirmquestion -----> Is it correct that preference_name is preference_value?
 confirmtrue -----> Yes, the preference_name is preference_value.
 confirmfalse -----> No, the preference_name is preference_value.
 confirmtruerest -----> Yes, the preference_name of restaurant_name is preference_value.

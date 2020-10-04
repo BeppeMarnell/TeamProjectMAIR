@@ -32,10 +32,6 @@ class StateManager:
         s2.addEdge(e23)
         s2.addEdge(e25)
 
-        # if yes moves to state 5, then you cannot say yes, then ask for more infos.
-        # Need state 6 as final state, only if you say goodbye or thank you
-        # State 5: restaurant is pretty safe, (has been ack or more details have been requested)
-        #  if alternative is asked, switch to S4
         e31 = Edge(s1, ['restart', 'hello'])
         e32 = Edge(s2, ['inform', 'deny'])
         e33 = Edge(s3, ['confirm', 'repeat', 'negate', 'reqmore', 'reqalts', 'thankyou'])
@@ -62,7 +58,7 @@ class StateManager:
 
         for s in self.__states:
             if s.state == state:
-                # special case if state is S2
+                # special case to move to state 3 if all preferences are given
                 if s.state == State.S2 or s.state == State.S1:
                     food = True if preferences['food'].tolist()[0] != '' else False
                     area = True if preferences['area'].tolist()[0] != '' else False
@@ -89,6 +85,7 @@ class StateNode:
         self.edges = []
 
     def addEdge(self, edge):
+        # Create list of edges
         self.edges.append(edge)
 
     def solve(self, utterance):

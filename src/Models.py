@@ -8,8 +8,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 import Levenshtein as lev
-import nltk
-from nltk.corpus import stopwords
 import re
 
 
@@ -24,19 +22,14 @@ class Models:
         self.areas = self.dataset.restaurant_info_df['area'].unique()
         self.foods = self.dataset.restaurant_info_df['food'].unique()
 
+        # DataFrame of possible restaurants
         self.restaurants = pd.DataFrame()
+        # One entry of self.restaurants that is recommended to the user
         self.recommendation = None
+        # Index, which entry of self.restaurants is currently recommended
         self.index = -1
 
-        self.further_pref = {
-            'busy': '',
-            'good food': '',
-            'long time': '',
-            'children': '',
-            'romantic': ''
-        }
-
-        # TODO: here you can activate and deactivate the models
+        # Here you can activate and deactivate the models
         self.models = {
             # 'logReg': LogisticRegression(C=100, random_state=0, max_iter=1000),
             # 'decTree': DecisionTreeClassifier(),
@@ -45,10 +38,8 @@ class Models:
             # 'kNeigh': KNeighborsClassifier(n_neighbors=3)
         }
 
-        # Set some variables
-
-        # TODO: Here you can activate if you'd like one or multiple models at the same time
-        # TODO: From task 1.b on, it is not possible to have multiple models
+        # Here you can activate if you'd like one or multiple models at the same time
+        # From task 1.b on, it is not possible to have multiple models
         self.singleModel = True
         self.singleModelName = 'multiNB'  # Default one
 
@@ -67,19 +58,21 @@ class Models:
         self.endLoading = True
 
     def showPerformances(self):
+        # Function that prints the accuracy and AUCROC of the chosen or of all models
+
         self.endLoading = False
 
         if self.baseline2:
             print('-----> baseline 2')
             dialog_act = []
             for example in self.dataset.x_test:
-                dialog_act.append(self.baseline2_expressions(example))
+                dialog_act.append(self.baseline2Expressions(example))
             accurate = accuracy_score(self.dataset.y_test, dialog_act)
             print(''.join(['-----> Accuracy: ', str(accurate)]))
 
         if self.singleModel:
             # Calculate performance for single model
-            print(''.join(['-----> Model: ', self.models[self.singleModelName]]))
+            print(''.join(['-----> Model: ', str(self.models[self.singleModelName])]))
             acc = self.__accuracy(self.models[self.singleModelName])
             aucroc = self.__AUCROC(self.models[self.singleModelName])
             print(''.join(['----->       Accuracy: ', str(acc)]))
@@ -117,24 +110,27 @@ class Models:
         return (macro_roc_auc_ovo + weighted_roc_auc_ovo + macro_roc_auc_ovr + weighted_roc_auc_ovr) / 4
 
     def __accuracy(self, model):
+        # Calculate accuracy of the model
         predicted = model.predict(self.dataset.x_test)
         return np.mean(predicted == self.dataset.y_test)
 
     def setSingleModel(self, singleModel=True, name='multiNB'):
+        # Set the single model, default is multiNB
         self.singleModel = singleModel
         self.singleModelName = name
 
     def evalueNewUtterance(self, utterance):
-        # TODO: Implement other baselines in a more thoughtful way
-        # Implement baseline
+        # Classify the input from the user as one of the utterances based on the used model
+
+        # Majority-class baseline
         if self.baseline1:
             return 'inform'
 
-        # Second baseline
+        # Second rule-based baseline
         if self.baseline2:
-            return self.baseline2_expressions(utterance)
+            return self.baseline2Expressions(utterance)
 
-        # Evaluate the new utterance
+        # Machine Learning model
         if self.singleModel:
             test = self.dataset.count_vect.transform([utterance])
             predicted = self.models[self.singleModelName].predict(test)
@@ -151,8 +147,9 @@ class Models:
 
         print('')
 
-    def baseline2_expressions(self, utterance):
+    def baseline2Expressions(self, utterance):
         # Use regular expressions or key-words to classify the dialog act in baseline 2
+
         ack = re.search("okay|um|ok|umh|ah", utterance)
         affirm = re.search("yes|right|alright|yeah|perfect|correct|cool|nice|awesome|great|sounds", utterance)
         bye = re.search("good bye|bye|darling|dear|goodb|[a-z]*bye", utterance)
@@ -169,8 +166,7 @@ class Models:
         restart = re.search("start over|nevermind|restart", utterance)
         thankyou = re.search("thank you|welcome|thank|thanks|day|good[a-z]*|afternoon", utterance)
 
-
-        if affirm !=None:
+        if affirm != None:
             return 'affirm'
 
         if ack != None:
@@ -218,6 +214,9 @@ class Models:
         return 'not found'
 
     def extractPreference(self, string, sys_utter):
+        # Extract the preference the user has entered. If none of the values of the restaurant data set are found,
+        # use the Levenshtein distance to find the closest match.
+
         # Lower the string in input
         string = string.lower()
 
@@ -369,39 +368,9 @@ class Models:
 
         return utterance
 
-    def get_levenshtein_items(self, miss_words, possible_words):
-        # Check for matching with Levenshtein distance
-        # more than distance 3 it will fail
-        # remove all stopwords to not get a close distance to words like 'the'
-        stop_words = set(stopwords.words('english'))
-        miss_words = [w for w in miss_words if w not in stop_words]
+    def lookupInRestaurantInfo(self, preferences):
+        # Look up any restaurants that fit to the given preferences.
 
-        dst = {
-            '1': [],
-            '2': [],
-            '3': []
-        }
-        for miss_word in miss_words:
-            # let's check if every misspelled word before food can be similar to something in the dataset
-            for word in possible_words:
-                if lev.distance(word, miss_word) <= 3:
-                    dst[str(lev.distance(word, miss_word))].append(word)
-        pref = []
-        # finally let's set the preference giving priority to the one with less distance
-        if len(dst['1']) >= 1:
-            pref = dst['1'][0]
-        else:
-            if len(dst['2']) >= 1:
-                pref = dst['2'][0]
-            else:
-                if len(dst['3']) >= 1:
-                    pref = dst['3'][0]
-                else:
-                    return ''
-                    # TODO set state to request more info (set string saying name is not recognized)
-        return pref
-
-    def lookup_in_restaurant_info(self, preferences):
         # Preference is true if it is not filled, so restaurants can already be looked up
         if preferences.loc[0]['food'] == 'any' or preferences.loc[0]['food'] == '':
             food = True
@@ -416,39 +385,46 @@ class Models:
         else:
             pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
 
-        #print("Price", pricerange)
-
-        # prevent from crashing due to no preferences
+        # prevent from crashing due to all no preferences
         if isinstance(food, bool) and isinstance(area, bool) and isinstance(pricerange, bool) \
                 and food and area and pricerange:
             restaurants = self.dataset.restaurant_info_df
         else:
             restaurants = self.dataset.restaurant_info_df.loc[food & area & pricerange]
-        #print("Restaurants",restaurants)
+
         self.restaurants = restaurants.reset_index()
 
-    def recommend_restaurant(self):
+    def __recommendRestaurant(self):
+        # Internal function to return the restaurant at the position of the index.
+
         if len(self.restaurants) == 0:
+            # set to -1, as it will be increased by one in method below
             self.index = -1
             return []
         if len(self.restaurants) <= self.index:
-            # set to -1, as it will be increased by one in method below
             self.index = -1
-            # return here to execute utterance saying that no more restaurants were found.
+            # return [-1] here to execute utterance saying that no more restaurants were found.
             # if another is requested, start over
             return [-1]
         return self.restaurants.loc[self.index]
 
     def recommend(self, preferences):
+        # Recommend one restaurant given the preferences.
+        # If there are multiple restaurants that satisfy the preferences, return a new one each time.
+
         self.index += 1
         if not set(self.restaurants):
-            #print(preferences['pricerange'])
-            self.lookup_in_restaurant_info(preferences)
-        self.recommendation = self.recommend_restaurant()
+            # If self.restaurants is empty, for example, because preferences have been updated,
+            # look up restaurants in data set
+            self.lookupInRestaurantInfo(preferences)
+        self.recommendation = self.__recommendRestaurant()
 
-    def extract_details(self, string):
+    def extractDetails(self, string):
+        # Function that extracts further details about the chosen restaurant from the user input.
+
         string = string.lower()
         requested = []
+        # possible keywords the user can use to get the requested detail
         details = {"restaurantname": ["name", "restaurantname", "restaurant"],
                    "pricerange": ["price", "pricerange", "cost", "how much"],
                    "area": ["area", "city", "part", "region"],
@@ -461,26 +437,7 @@ class Models:
             names = details.get(element)
             for item in names:
                 if item in string:
+                    # use first element of array in tuple, as that is a nicer name than the key
                     requested.append((details.get(element)[0], self.recommendation[element]))
                     break
         return requested
-
-    def implication_rules(self, further_pref):
-        restaurants = self.restaurants
-        # TODO do iterations
-        # TODO fix same consequent for different rules (using just and is not possible)
-        #   need iterations and use lower level?
-        print(restaurants['foodquality'])
-
-        for column in further_pref:
-            # Select column contents by column name using [] operator
-            columnSeriesObj = further_pref[column]
-
-            print('Colunm Name : ', column)
-            print('Column Contents : ', columnSeriesObj.values)
-            if columnSeriesObj.values[0]:
-                print(True)
-                # while self.further_pref[column] == '':
-                # self.rules(restaurants)
-        print(restaurants)
-        # return restaurants
