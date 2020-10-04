@@ -38,10 +38,10 @@ class Main:
 if __name__ == '__main__':
     # function that runs the main class with the given arguments
     p = argparse.ArgumentParser()
-    p.add_argument("--formal", help="formal or informal system speech. Use informal for informal "
+    p.add_argument("--formal", help="formal or informal system speech. Use 'informal' for informal "
                                     "speech.", default="formal")
-    p.add_argument("--delay", help="Use delay for a delay of 2 seconds. Use delay_mess for a delay of 2 seconds "
-                                   "accompanied with a message. Use off for no delay", default="off")
-    p.add_argument("--caps", help="Use caps for system output to be in all caps.", default="no_caps")
+    p.add_argument("--delay", help="Use 'delay' for a delay of 2 seconds. Use 'delay_mess' for a delay of 2 seconds "
+                                   "accompanied with a message.", default="off")
+    p.add_argument("--caps", help="Use 'caps' for system output to be in all caps.", default="no_caps")
     args = p.parse_args(sys.argv[1:])
     Main(args.formal, args.delay, args.caps)

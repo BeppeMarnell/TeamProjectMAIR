@@ -82,6 +82,7 @@ class ChatManager:
                     'food': ''
                 }
                 self.pref_df = pd.DataFrame(pref, index=[0])
+                self.models.index = -1
 
             # S5 is the end state, therefore terminate the program
             if self.state == State.S5:
@@ -533,14 +534,16 @@ class ChatManager:
             self.models.recommend(self.pref_df)
 
         # Suggest start over or the alternative
-        self.print_text = '-----> There are no results for your preferences. ' \
-                          'You can type start over or look at the following alternative' + '\n'
+        self.print_text = self.sys_utter['alt1'] + '\n'
 
         alt_1 = self.sys_utter['alternatives'].replace('restaurant_name', self.models.recommendation['restaurantname'])\
             .replace('food_name', self.models.recommendation['food'])\
             .replace('area_name', self.models.recommendation['area'])\
-            .replace('price_range', self.models.recommendation['pricerange'])
+            .replace('price_range', self.models.recommendation['pricerange'])\
+            .replace('RESTAURANT_NAME', self.models.recommendation['restaurantname']) \
+            .replace('FOOD_NAME', self.models.recommendation['food']) \
+            .replace('AREA_NAME', self.models.recommendation['area']) \
+            .replace('PRICE_RANGE', self.models.recommendation['pricerange'])
 
         self.print_text += alt_1 + '\n'
-        self.print_text += '-----> If you would like more alternatives, request more options. ' \
-                           'Otherwise, confirm the alternative please!'
+        self.print_text += self.sys_utter['alt2']
