@@ -10,7 +10,7 @@ import time
 
 class ChatManager:
 
-    def __init__(self, models, phrase_style="", mess_delay="", mess_caps=""):
+    def __init__(self, models, phrase_style="", mess_delay="", delay_time=0, mess_caps=""):
         # Define properties
         self.models = models
         self.rules = Rules()
@@ -50,9 +50,11 @@ class ChatManager:
 
         if mess_delay == "delay":
             self.delay = True
+            self.delay_time = int(delay_time)
             self.delay_mess = False
         if mess_delay == "delay_mess":
             self.delay = True
+            self.delay_time = int(delay_time)
             self.delay_mess = True
         else:
             self.delay = False
@@ -68,7 +70,7 @@ class ChatManager:
             if self.delay:
                 if self.delay_mess:
                     print(self.sys_utter['loading'])
-                time.sleep(2)
+                time.sleep(self.delay_time)
 
             # Check system state and preferences
             self.systemStateUtterance()

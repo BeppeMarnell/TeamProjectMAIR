@@ -18,7 +18,7 @@ print("Files in %r: %s" % (cwd, files))
 
 class Main:
 
-    def __init__(self, formal, delay, caps):
+    def __init__(self, formal, delay, delay_time, caps):
         # Load the dataset
         data = DatasetLoader()
         # Create and train the models
@@ -31,7 +31,7 @@ class Main:
             time.sleep(1)
 
         # Initialize the chat and run the dialogs
-        chat = ChatManager(modelz, formal, delay, caps)
+        chat = ChatManager(modelz, formal, delay, delay_time, caps)
         chat.run()
 
 
@@ -40,8 +40,9 @@ if __name__ == '__main__':
     p = argparse.ArgumentParser()
     p.add_argument("--formal", help="formal or informal system speech. Use 'informal' for informal "
                                     "speech.", default="formal")
-    p.add_argument("--delay", help="Use 'delay' for a delay of 2 seconds. Use 'delay_mess' for a delay of 2 seconds "
+    p.add_argument("--d", help="Use 'delay' for a delay. Use 'delay_mess' for a delay "
                                    "accompanied with a message.", default="off")
+    p.add_argument("--dt", help="Define here how long of a delay there should be (in seconds)", default=0)
     p.add_argument("--caps", help="Use 'caps' for system output to be in all caps.", default="no_caps")
     args = p.parse_args(sys.argv[1:])
-    Main(args.formal, args.delay, args.caps)
+    Main(args.formal, args.d, args.dt, args.caps)
