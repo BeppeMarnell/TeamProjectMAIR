@@ -116,11 +116,6 @@ class ChatManager:
         # Start the chat loop
         while True:
 
-            if self.delay:
-                if self.delay_mess:
-                    print(self.sys_utter['loading'])
-                time.sleep(self.delay_time)
-
             # Check system state and preferences
             self.systemStateUtterance()
 
@@ -141,6 +136,11 @@ class ChatManager:
 
             # Ask user for input
             user_input = input('-----> ')
+
+            if self.delay:
+                if self.delay_mess:
+                    print(self.sys_utter['loading'])
+                time.sleep(self.delay_time)
 
             # Evaluate inputted utterance and check the next state
             utterance = self.models.evalueNewUtterance(user_input)
