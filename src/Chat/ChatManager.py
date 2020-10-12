@@ -10,7 +10,7 @@ import time
 
 class ChatManager:
 
-    def __init__(self, models, phrase_style="", mess_delay="", delay_time=0, mess_caps=""):
+    def __init__(self, models, group, phrase_style="", mess_caps=""):
         # Define properties
         self.models = models
         self.rules = Rules()
@@ -47,18 +47,67 @@ class ChatManager:
                     self.sys_utter[keys[0]] = ' '.join(keys[1:]).upper()
                 else:
                     self.sys_utter[keys[0]] = ' '.join(keys[1:])
-
-        if mess_delay == "delay":
+        if group:
             self.delay = True
-            self.delay_time = int(delay_time)
+            self.delay_time = 0
             self.delay_mess = False
-        if mess_delay == "delay_mess":
-            self.delay = True
-            self.delay_time = int(delay_time)
-            self.delay_mess = True
+            if group[0] == "G1NOM":
+                if group[1] == "1":
+                    self.delay_time = 0.1
+                    self.delay_mess = False
+                elif group[1] == "2":
+                    self.delay_time = 0.1
+                    self.delay_mess = True
+                else:
+                    print("Warning: task number not defined")
+            if group[0] == "G1MNO":
+                if group[1] == "1":
+                    self.delay_time = 0.1
+                    self.delay_mess = True
+                elif group[1] == "2":
+                    self.delay_time = 0.1
+                    self.delay_mess = False
+                else:
+                    print("Warning: task number not defined")
+            if group[0] == "G2NOM":
+                if group[1] == "1":
+                    self.delay_time = 1.0
+                    self.delay_mess = False
+                elif group[1] == "2":
+                    self.delay_time = 1.0
+                    self.delay_mess = True
+                else:
+                    print("Warning: task number not defined")
+            if group[0] == "G2MNO":
+                if group[1] == "1":
+                    self.delay_time = 1.0
+                    self.delay_mess = True
+                elif group[1] == "2":
+                    self.delay_time = 1.0
+                    self.delay_mess = False
+                else:
+                    print("Warning: task number not defined")
+            if group[0] == "G3NOM":
+                if group[1] == "1":
+                    self.delay_time = 10.0
+                    self.delay_mess = False
+                elif group[1] == "2":
+                    self.delay_time = 10.0
+                    self.delay_mess = True
+                else:
+                    print("Warning: task number not defined")
+            if group[0] == "G3MNO":
+                if group[1] == "1":
+                    self.delay_time = 10.0
+                    self.delay_mess = True
+                elif group[1] == "2":
+                    self.delay_time = 10.0
+                    self.delay_mess = False
+                else:
+                    print("Warning: task number not defined")
         else:
+            print("Warning: No group has been given.")
             self.delay = False
-            self.delay_mess = False
 
         # Print the first system message
         print(self.sys_utter['welcome'])
