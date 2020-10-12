@@ -37,7 +37,7 @@ class DatasetLoader:
         self.y_test = test['dialog_act'].values
 
         # LOGs
-        print('-----> Dataset Loaded \n')
+        # print('-----> Dataset Loaded \n')
 
     def __clean(self):
         # Function used to lowercase the data set

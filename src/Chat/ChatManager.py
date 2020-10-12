@@ -10,7 +10,7 @@ import time
 
 class ChatManager:
 
-    def __init__(self, models, phrase_style="", mess_delay="", mess_caps=""):
+    def __init__(self, models, phrase_style="", mess_delay="", delay_time=0, mess_caps=""):
         # Define properties
         self.models = models
         self.rules = Rules()
@@ -50,9 +50,11 @@ class ChatManager:
 
         if mess_delay == "delay":
             self.delay = True
+            self.delay_time = float(delay_time)
             self.delay_mess = False
-        if mess_delay == "delay_mess":
+        elif mess_delay == "delay_mess":
             self.delay = True
+            self.delay_time = float(delay_time)
             self.delay_mess = True
         else:
             self.delay = False
@@ -65,10 +67,7 @@ class ChatManager:
         # Start the chat loop
         while True:
 
-            if self.delay:
-                if self.delay_mess:
-                    print(self.sys_utter['loading'])
-                time.sleep(2)
+
 
             # Check system state and preferences
             self.systemStateUtterance()
@@ -82,6 +81,7 @@ class ChatManager:
                     'food': ''
                 }
                 self.pref_df = pd.DataFrame(pref, index=[0])
+                self.models.index = -1
 
             # S5 is the end state, therefore terminate the program
             if self.state == State.S5:
@@ -89,6 +89,11 @@ class ChatManager:
 
             # Ask user for input
             user_input = input('-----> ')
+
+            if self.delay:
+                if self.delay_mess:
+                    print(self.sys_utter['loading'])
+                time.sleep(self.delay_time)
 
             # Evaluate inputted utterance and check the next state
             utterance = self.models.evalueNewUtterance(user_input)
@@ -533,14 +538,16 @@ class ChatManager:
             self.models.recommend(self.pref_df)
 
         # Suggest start over or the alternative
-        self.print_text = '-----> There are no results for your preferences. ' \
-                          'You can type start over or look at the following alternative' + '\n'
+        self.print_text = self.sys_utter['alt1'] + '\n'
 
         alt_1 = self.sys_utter['alternatives'].replace('restaurant_name', self.models.recommendation['restaurantname'])\
             .replace('food_name', self.models.recommendation['food'])\
             .replace('area_name', self.models.recommendation['area'])\
-            .replace('price_range', self.models.recommendation['pricerange'])
+            .replace('price_range', self.models.recommendation['pricerange'])\
+            .replace('RESTAURANT_NAME', self.models.recommendation['restaurantname']) \
+            .replace('FOOD_NAME', self.models.recommendation['food']) \
+            .replace('AREA_NAME', self.models.recommendation['area']) \
+            .replace('PRICE_RANGE', self.models.recommendation['pricerange'])
 
         self.print_text += alt_1 + '\n'
-        self.print_text += '-----> If you would like more alternatives, request more options. ' \
-                           'Otherwise, confirm the alternative please!'
+        self.print_text += self.sys_utter['alt2']

@@ -25,5 +25,6 @@ repeat_ask -----> Please answer the question.
 word_not_exist -----> Either miss_word does not occur in my database or something else went wrong.
 apologize -----> I apologize for the inconvenience. Please try something else.
 loading -----> loading, please wait...
+alt1 -----> There are no results for your preferences. You can type start over or look at the following alternative
 alternatives -----> Alternative option: restaurant restaurant_name is serving food_name food in area_name part of town for price_range price.
-
+alt2 -----> If you would like more alternatives, request more options. Otherwise, confirm the alternative please!

@@ -1,19 +1,19 @@
+import pickle
+import re
+import Levenshtein as lev
 import numpy as np
 import pandas as pd
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
-from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-import Levenshtein as lev
-import re
 
 
 class Models:
 
     def __init__(self, dataset, baseline1=False, baseline2=False):
+        # Set the model to load in local from the file 'assets/multiNB_model.sav'
+        self.local_load_model_ = True
+
         # Get the train and test sets
         self.dataset = dataset
 
@@ -48,13 +48,18 @@ class Models:
 
         self.endLoading = False
 
-        # Train the models
-        for model in self.models:
-            self.models[model].fit(self.dataset.x_train, self.dataset.y_train)
-            print(''.join(['-----> Loading model: ', model]))
+        # Train the models if the model is not locally saved
+        if self.local_load_model_:
+            filename = 'assets/multiNB_model.sav'
+            self.models['multiNB'] = pickle.load(open(filename, 'rb'))
+
+        else:
+            for model in self.models:
+                self.models[model].fit(self.dataset.x_train, self.dataset.y_train)
+                # print(''.join(['-----> Loading model: ', model]))
 
         # LOGs
-        print('-----> All models have been loaded and trained on BOW \n')
+        # print('-----> All models have been loaded and trained\n')
         self.endLoading = True
 
     def showPerformances(self):
@@ -385,7 +390,7 @@ class Models:
         else:
             pricerange = self.dataset.restaurant_info_df['pricerange'] == preferences.loc[0]['pricerange']
 
-        # prevent from crashing due to all no preferences
+        # prevent from crashing due to no preferences
         if isinstance(food, bool) and isinstance(area, bool) and isinstance(pricerange, bool) \
                 and food and area and pricerange:
             restaurants = self.dataset.restaurant_info_df
