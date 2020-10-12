@@ -137,6 +137,7 @@ class ChatManager:
             # Ask user for input
             user_input = input('-----> ')
 
+            # introduce delay if applicable
             if self.delay:
                 if self.delay_mess:
                     print(self.sys_utter['loading'])
