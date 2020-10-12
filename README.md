@@ -74,3 +74,5 @@ python3 main.py --caps 'caps'
 
 <!-- # Transition diagram:
 ![Image of Yaktocat](diagram.jpg) -->
+
+[![Run on Repl.it](https://repl.it/badge/github/BeppeMarnell/TeamProjectMAIR)](https://repl.it/github/BeppeMarnell/TeamProjectMAIR)
