@@ -2,10 +2,10 @@
 [![Run on Repl.it](https://repl.it/badge/github/BeppeMarnell/TeamProjectMAIR)](https://repl.it/join/xzfusfxa-beppemarnell)
 
 
-[G3MNO - Room1](https://repl.it/join/gcbxsezr-beppemarnell)
-[G3MNO - Room2](https://repl.it/join/gcbxsezr-beppemarnell)
-[G3MNO - Room3](https://repl.it/join/gcbxsezr-beppemarnell)
-[G3MNO - Room4](https://repl.it/join/gcbxsezr-beppemarnell)
+[G3MNO - Room1](https://repl.it/join/gcbxsezr-beppemarnell) \\
+[G3MNO - Room2](https://repl.it/join/cmuzflxb-beppemarnell) \\
+[G3NOM - Room3](https://repl.it/join/byhmlzuo-beppemarnell) \\
+[G3NOM - Room4](https://repl.it/join/wfowtzea-beppemarnell)
 
 The project consists in designing, implementing, evaluating and writing about a restaurant recommendations dialog system using various methods from AI, such as domain modeling, text classification using machine learning and user experience testing. The dialog system is programmed in Python 3. The program is terminal/command line based. No graphical user interface was used. 
 
