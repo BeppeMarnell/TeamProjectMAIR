@@ -12,6 +12,8 @@ The project is divided into two parts:
 [G3NOM - Room3](https://repl.it/join/byhmlzuo-beppemarnell)<br />
 [G3NOM - Room4](https://repl.it/join/wfowtzea-beppemarnell)<br />
 
+[G3MNO instructions](G3MNO.pdf) <br />
+[G3NOM instructions](G3NOM.pdf) <br />
 
 ## How to install and run
 ### Required libraries
