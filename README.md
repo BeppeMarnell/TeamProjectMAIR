@@ -17,6 +17,10 @@ The project is divided into two parts:
 
 [Questionnaire](https://forms.gle/dGJscYppe7djqxJc6)<br />
 
+| G3MNO | G3NOM |
+|-------|-------|
+|       |       |
+
 ## How to install and run
 ### Required libraries
 MAIRDISY is written in Python 3 and it utilises various libraries:
