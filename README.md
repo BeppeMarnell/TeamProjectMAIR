@@ -19,7 +19,7 @@ The project is divided into two parts:
 
 | G3MNO | G3NOM |
 |-------|-------|
-|       |       |
+| 0     | 0     |
 
 ## How to install and run
 ### Required libraries
