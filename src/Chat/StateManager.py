@@ -34,8 +34,8 @@ class StateManager:
 
         e31 = Edge(s1, ['restart', 'hello'])
         e32 = Edge(s2, ['inform', 'deny'])
-        e33 = Edge(s3, ['confirm', 'repeat', 'negate', 'reqmore', 'reqalts', 'thankyou'])
-        e34 = Edge(s4, ['request', 'ack', 'affirm', 'null'])
+        e33 = Edge(s3, ['confirm', 'repeat', 'negate', 'reqmore', 'reqalts', 'thankyou', 'request'])
+        e34 = Edge(s4, ['ack', 'affirm', 'null'])
         e35 = Edge(s5, ['bye'])
         s3.addEdge(e31)
         s3.addEdge(e32)
