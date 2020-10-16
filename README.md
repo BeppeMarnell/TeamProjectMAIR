@@ -17,9 +17,13 @@ The project is divided into two parts:
 
 [Questionnaire](https://forms.gle/dGJscYppe7djqxJc6)<br />
 
-| G3MNO | G3NOM |
-|-------|-------|
-| 0     | 1     |
+|        | G3MNO | G3NOM |
+|--------|-------|-------|
+| Daniel | 0     | 1     |
+| Sinie  | 0     | 0     |
+| Pepijn | 0     | 0     |
+| Beppe  | 0     | 0     |
+| tot    | 0     | 1     |
 
 ## How to install and run
 ### Required libraries
