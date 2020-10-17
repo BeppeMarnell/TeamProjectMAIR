@@ -20,10 +20,10 @@ The project is divided into two parts:
 |        | G3MNO | G3NOM |
 |--------|-------|-------|
 | Daniel | 0     | 2     |
-| Sinie  | 0     | 0     |
+| Sinie  | 3     | 0     |
 | Pepijn | 0     | 0     |
 | Beppe  | 1     | 1     |
-| tot    | 1     | 3     |
+| tot    | 4     | 3     |
 
 ## How to install and run
 ### Required libraries
