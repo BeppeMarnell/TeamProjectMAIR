@@ -22,8 +22,8 @@ The project is divided into two parts:
 | Daniel | 0     | 2     |
 | Sinie  | 3     | 0     |
 | Pepijn | 0     | 0     |
-| Beppe  | 1     | 1     |
-| tot    | 4     | 3     |
+| Beppe  | 3     | 2     |
+| tot    | 6     | 4     |
 
 ## How to install and run
 ### Required libraries
