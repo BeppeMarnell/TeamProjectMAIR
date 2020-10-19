@@ -19,11 +19,11 @@ The project is divided into two parts:
 
 |        | G3MNO | G3NOM |
 |--------|-------|-------|
-| Daniel | 1     | 3     |
+| Daniel | 2     | 3     |
 | Sinie  | 3     | 2     |
 | Pepijn | 0     | 0     |
 | Beppe  | 3     | 2     |
-| tot    | 7     | 7     |
+| tot    | 8     | 7     |
 
 ## How to install and run
 ### Required libraries
